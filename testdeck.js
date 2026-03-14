@@ -1,5 +1,3 @@
-deck.js v10.1 — with all 3 bug fixes
-📋 Copy Entire File
 // ═══ VML DECK ENGINE v10.1 ═══
 
 var C={black:'191919',white:'F5F5F5',dkGray:'363732',mdGray:'53544A',gray:'8B8C81',ltGray:'C2C4B8',accent:AH,accentLight:AL,accentDark:AD};
