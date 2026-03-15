@@ -1,5 +1,5 @@
-// VML DECK LAYOUTS v1.4
-// Fixed: closing overlap, stats card height, cards pill overlap, footnote overlap
+// VML DECK LAYOUTS v1.5
+// Fixed: card content spacing, card height cap, rows tight mode, stats cap, closing/title
 (function(){
 'use strict';
 var _origRenderAll=window.renderAll;
@@ -34,7 +34,6 @@ case 'bullets':return layoutBullets(s);
 default:return s.els||[];
 }
 }
-// ── TITLE (verified: Matcha y:2.2/2.55/3.55/3.95) ──
 function layoutTitle(s){
 var els=[];
 var tH=(s.title&&s.title.length>40)?1.2:0.7;
@@ -45,7 +44,6 @@ if(s.subtitle){els.push({type:'t',text:s.subtitle,x:.5,y:sY,w:10,h:.4,font:'B',s
 if(s.description)els.push({type:'t',text:s.description,x:.5,y:sY,w:10,h:.5,font:'B',size:12,color:'body'});
 return els;
 }
-// ── CLOSING (verified: Matcha y:2.6/3.45/3.85) ──
 function layoutClosing(s){
 var els=[];
 var tH=(s.title&&s.title.length>40)?1.2:0.7;
@@ -55,7 +53,6 @@ if(s.subtitle){els.push({type:'t',text:s.subtitle,x:.5,y:sY,w:10,h:.4,font:'B',s
 if(s.attribution)els.push({type:'t',text:s.attribution,x:.5,y:sY,w:10,h:.3,font:'B',size:11,color:'body'});
 return els;
 }
-// ── CARDS (compact mode for 2+ rows, pill-aware body height) ──
 function layoutCards(s){
 var els=[];
 var items=s.items||[];
@@ -69,7 +66,7 @@ var gap=0.2;
 var hasFootnote=!!s.footnote;
 var totalH=hasFootnote?3.6:4.0;
 var rawH=(totalH-(nRows-1)*gap)/nRows;
-var cardH=nRows===1?Math.min(rawH,4.0):rawH;
+var cardH=nRows===1?Math.min(rawH,3.0):rawH;
 var compact=cardH<2.5;
 items.forEach(function(item,i){
 var col=i%cols;
@@ -94,12 +91,12 @@ if(item.sub){els.push({type:'t',text:item.sub,x:ix,y:ny,w:tw,h:.25,font:'H',size
 els.push({type:'d',x:ix,y:ny,w:dw,color:'ltGray'});
 ny+=0.15;
 }else{
-if(item.icon){els.push({type:'i',icon:item.icon,x:ix,y:ny+0.05,w:.5,h:.5});ny+=0.65;}
-els.push({type:'t',text:item.title||'',x:ix,y:ny,w:tw,h:.4,font:'H',size:15,color:'title'});
-ny+=0.45;
+if(item.icon){els.push({type:'i',icon:item.icon,x:ix,y:ny+0.05,w:.5,h:.5});ny+=0.75;}
+els.push({type:'t',text:item.title||'',x:ix,y:ny,w:tw,h:.55,font:'H',size:15,color:'title'});
+ny+=0.6;
 if(item.sub){els.push({type:'t',text:item.sub,x:ix,y:ny,w:tw,h:.3,font:'H',size:13,color:'accent'});ny+=0.35;}
 els.push({type:'d',x:ix,y:ny,w:dw,color:'ltGray'});
-ny+=0.2;
+ny+=0.25;
 }
 var pillSpace=item.pill?0.55:0.15;
 var bodyH=cardH-(ny-cy)-pillSpace;
@@ -112,7 +109,6 @@ els.push({type:'t',text:s.footnote,x:.5,y:fnY,w:11,h:.3,font:'B',size:11,color:'
 }
 return els;
 }
-// ── STATS (capped card height, centered vertically, adaptive value width) ──
 function layoutStats(s){
 var els=[];
 var items=s.items||[];
@@ -155,7 +151,6 @@ els.push({type:'t',text:item.text||'',x:ix,y:cy+1.0,w:tw,h:cardH-1.15,font:'B',s
 });
 return els;
 }
-// ── SPLIT ──
 function layoutSplit(s){
 var els=[];
 var items=s.items||[];
@@ -177,7 +172,6 @@ if(item.text)els.push({type:'t',text:item.text,x:cx,y:iy,w:tw,h:3.5,font:'B',siz
 if(s.footnote)els.push({type:'t',text:s.footnote,x:.5,y:6.2,w:11,h:.5,font:'B',size:11,color:'muted'});
 return els;
 }
-// ── ROWS ──
 function layoutRows(s){
 var els=[];
 var items=s.items||[];
@@ -189,10 +183,21 @@ var startY=2.0;
 var totalH=6.1-startY;
 var gap=0.1;
 var rowH=(totalH-(items.length-1)*gap)/items.length;
+var tight=rowH<0.7;
 items.forEach(function(item,i){
 var ry=startY+i*(rowH+gap);
 var num=('0'+(i+1)).slice(-2);
 els.push({type:'s',x:.5,y:ry,w:12.3,h:rowH,fill:'cardBg',border:'ltGray',bw:1});
+if(tight){
+if(numbered){
+els.push({type:'t',text:num,x:.7,y:ry+0.08,w:0.6,h:.4,font:'H',size:18,color:'accent'});
+els.push({type:'t',text:item.title||'',x:1.4,y:ry+0.08,w:2.5,h:.4,font:'H',size:12,color:'title'});
+els.push({type:'t',text:item.text||'',x:4.0,y:ry+0.08,w:8.0,h:.4,font:'B',size:11,color:'body'});
+}else{
+els.push({type:'t',text:item.title||'',x:.7,y:ry+0.08,w:3.0,h:.4,font:'H',size:12,color:'title'});
+els.push({type:'t',text:item.text||'',x:3.8,y:ry+0.08,w:8.2,h:.4,font:'B',size:11,color:'body'});
+}
+}else{
 if(numbered){
 els.push({type:'t',text:num,x:.7,y:ry+0.1,w:1.0,h:.35,font:'H',size:28,color:'accent'});
 els.push({type:'t',text:item.title||'',x:1.8,y:ry+0.1,w:3.5,h:.35,font:'H',size:13,color:'title'});
@@ -201,11 +206,11 @@ els.push({type:'t',text:item.text||'',x:1.8,y:ry+0.45,w:9.8,h:rowH-0.55,font:'B'
 els.push({type:'t',text:item.title||'',x:.7,y:ry+0.1,w:11.0,h:.35,font:'H',size:13,color:'title'});
 els.push({type:'t',text:item.text||'',x:.7,y:ry+0.45,w:11.0,h:rowH-0.55,font:'B',size:11,color:'body'});
 }
+}
 });
 if(s.footnote)els.push({type:'t',text:s.footnote,x:.5,y:6.2,w:11,h:.3,font:'B',size:11,color:'muted'});
 return els;
 }
-// ── DETAIL ──
 function layoutDetail(s){
 var els=[];
 var items=s.items||[];
@@ -228,7 +233,6 @@ if(i<items.length-1)els.push({type:'d',x:ix,y:iy+0.55,w:cardW-0.8,color:'ltGray'
 if(s.footnote)els.push({type:'t',text:s.footnote,x:.5,y:cardY+cardH+0.5,w:11,h:.5,font:'B',size:11,color:'muted'});
 return els;
 }
-// ── BULLETS ──
 function layoutBullets(s){
 var els=[];
 var items=s.items||[];
