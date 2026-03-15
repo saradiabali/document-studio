@@ -66,27 +66,9 @@ var cur=0;
 function show(i){var f=document.querySelectorAll('.sf');if(i<0||i>=f.length)return;f[cur].style.display='none';cur=i;f[cur].style.display='block';document.getElementById('nc').textContent=(cur+1)+' / '+D.length;document.getElementById('hc').textContent='SLIDE '+(cur+1)+' OF '+D.length;}
 function scl(){var vp=document.getElementById('vp'),wr=document.getElementById('sw');var s=Math.min((vp.clientWidth-32)/1066,(vp.clientHeight-8)/600,1);wr.style.transform='scale('+s+')';wr.style.transformOrigin='top center';}
 
-// ═══ INIT (injects all UI) ═══
+// ═══ INIT (wires events on existing DOM) ═══
 function init(){
-var lk=document.createElement('link');lk.href='https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500&display=swap';lk.rel='stylesheet';document.head.appendChild(lk);
-var ps=document.createElement('script');ps.src='https://cdn.jsdelivr.net/gh/gitbrent/pptxgenjs/dist/pptxgen.bundle.js';document.head.appendChild(ps);
-var sty=document.createElement('style');sty.textContent='*{margin:0;padding:0;box-sizing:border-box;}body{background:#111;font-family:"DM Sans",sans-serif;color:#F5F5F5;height:100vh;display:flex;flex-direction:column;overflow:hidden;}.bp{background:#0a0a0a;border-bottom:1px solid #2a2a2a;padding:6px 24px;display:flex;align-items:center;gap:14px;font-size:11px;flex-wrap:wrap;flex-shrink:0;}.bp-label{font-size:9px;font-weight:600;letter-spacing:1.5px;color:#5E889C;text-transform:uppercase;}.bp-upload{cursor:pointer;padding:3px 10px;border:1px dashed #444;border-radius:3px;color:#888;font-size:10px;font-family:"DM Sans",sans-serif;background:none;}.bp-upload:hover{border-color:#888;color:#ccc;}.bp-upload.loaded{border-color:#3fb950;border-style:solid;color:#3fb950;}.bp-remove{cursor:pointer;padding:3px 8px;border:1px dashed #f85149;border-radius:3px;color:#f85149;font-size:10px;font-family:"DM Sans",sans-serif;background:none;display:none;}.bp-remove:hover{border-style:solid;}.bp-sep{width:1px;height:16px;background:#333;}.bp-color{display:flex;align-items:center;gap:5px;color:#888;font-size:10px;}.bp-color input[type="color"]{width:22px;height:18px;border:1px solid #444;border-radius:2px;background:#222;cursor:pointer;padding:1px;}.bp-hex{font-family:monospace;font-size:10px;color:#79c0ff;}.bp-ssize{display:flex;align-items:center;gap:5px;color:#888;font-size:10px;}.bp-ssize input[type="range"]{width:60px;accent-color:#5E889C;}.bp-szv{font-family:monospace;font-size:10px;color:#79c0ff;}.hdr{display:flex;justify-content:space-between;align-items:center;padding:5px 24px;font-size:12px;flex-shrink:0;}.hdr .tt{color:#F5F5F5;font-weight:500;}.hdr .ct{color:#8B8C81;}#vp{display:flex;justify-content:center;padding:4px 16px;flex:1;overflow:hidden;align-items:flex-start;}#sw{transform-origin:top center;}.sf{position:relative;width:1066px;height:600px;overflow:hidden;font-family:"DM Sans",sans-serif;border:1px solid #333;}.dk{background:#191919;}.lt{background:#F5F5F5;}.ab{position:absolute;left:29px;top:44px;width:96%;height:2px;}.sn{position:absolute;right:15px;top:12px;font-size:10px;font-weight:600;}.li{position:absolute;left:29px;top:12px;width:17px;height:17px;}.lw{position:absolute;left:29px;bottom:16px;width:54px;height:17px;}.ctrl{display:flex;justify-content:space-between;align-items:center;padding:6px 24px;flex-shrink:0;}.ng{display:flex;align-items:center;gap:10px;}.nb{background:none;border:1px solid #53544A;color:#C2C4B8;padding:5px 12px;cursor:pointer;font-size:11px;}.nb:hover{border-color:#8B8C81;}.db{border:none;padding:6px 18px;font-weight:600;font-size:12px;cursor:pointer;}.db:disabled{opacity:.5;cursor:not-allowed;}#st{text-align:right;padding:1px 24px;font-size:10px;color:#8B8C81;min-height:14px;flex-shrink:0;}';document.head.appendChild(sty);
-var tt='Presentation';if(D&&D[0]&&D[0].els){for(var i=0;i<D[0].els.length;i++){if(D[0].els[i].type==='t'&&D[0].els[i].size>=36){tt=D[0].els[i].text;break;}}}
-var n=D?D.length:0;var ah=typeof AH!=='undefined'?AH:'8B8C81';
-var ui='';
-ui+='<div class="bp"><span class="bp-label">Slide Branding</span>';
-ui+='<button class="bp-upload" id="uploadBtn">\uD83D\uDCD0 Upload Client/Partner Logo</button>';
-ui+='<input type="file" accept=".svg" id="fileInput" style="display:none;">';
-ui+='<button class="bp-remove" id="removeBtn">\u2715</button>';
-ui+='<div class="bp-ssize"><span>Logo Size:</span><input type="range" id="sizeSlider" min="12" max="22" value="16" step="1"><span class="bp-szv" id="szVal">16</span></div>';
-ui+='<div class="bp-sep"></div>';
-ui+='<div class="bp-color"><span>Color:</span><input type="color" id="colorPick" value="#'+ah+'"><span class="bp-hex" id="hexVal">#'+ah+'</span></div></div>';
-ui+='<div class="hdr"><span class="tt" id="deckTitle">'+esc(tt)+'</span><span class="ct" id="hc">SLIDE 1 OF '+n+'</span></div>';
-ui+='<div id="vp"><div id="sw"></div></div>';
-ui+='<div class="ctrl"><div class="ng"><button class="nb" id="pBtn">\u2190 PREV</button><span id="nc" style="color:#8B8C81;font-size:11px;">1 / '+n+'</span><button class="nb" id="nBtn">NEXT \u2192</button></div><button class="db" id="dlBtn" style="background:#'+ah+';color:#191919;">\u2B07 DOWNLOAD PPTX</button></div>';
-ui+='<div id="st"></div>';
-document.body.insertAdjacentHTML('afterbegin',ui);
-renderAll();scl();setTimeout(placeImages,500);
+renderAll();scl();refreshSlides();setTimeout(placeImages,500);
 document.getElementById('pBtn').addEventListener('click',function(){show(cur-1);});
 document.getElementById('nBtn').addEventListener('click',function(){show(cur+1);});
 document.getElementById('dlBtn').addEventListener('click',dlP);
@@ -94,41 +76,10 @@ window.addEventListener('resize',scl);
 document.addEventListener('keydown',function(e){if(e.key==='ArrowLeft')show(cur-1);if(e.key==='ArrowRight')show(cur+1);});
 if(document.getElementById('uploadBtn')){
 document.getElementById('uploadBtn').addEventListener('click',function(){document.getElementById('fileInput').click();});
-document.getElementById('fileInput').addEventListener('change',function(e){
-if(!e.target.files[0])return;
-var reader=new FileReader();
-reader.addEventListener('load',function(ev){
-var svgText=ev.target.result;
-document.getElementById('uploadBtn').classList.add('loaded');
-document.getElementById('uploadBtn').textContent='\u2705 '+e.target.files[0].name;
-var rmBtn=document.getElementById('removeBtn');if(rmBtn)rmBtn.style.display='inline-block';
-var done=0;
-renderSVGToImage(svgText,'#F5F5F5',60,function(d,ar){CL_WHITE=d;if(ar)CLIENT_AR=ar;done++;if(done===2){renderAll();refreshSlides();}});
-renderSVGToImage(svgText,'#191919',60,function(d,ar){CL_BLACK=d;if(ar)CLIENT_AR=ar;done++;if(done===2){renderAll();refreshSlides();}});
-});
-reader.readAsText(e.target.files[0]);
-});
+document.getElementById('fileInput').addEventListener('change',function(e){if(!e.target.files[0])return;var reader=new FileReader();reader.addEventListener('load',function(ev){var svgText=ev.target.result;document.getElementById('uploadBtn').classList.add('loaded');document.getElementById('uploadBtn').textContent='\u2705 '+e.target.files[0].name;var rmBtn=document.getElementById('removeBtn');if(rmBtn)rmBtn.style.display='inline-block';var done=0;renderSVGToImage(svgText,'#F5F5F5',60,function(d,ar){CL_WHITE=d;if(ar)CLIENT_AR=ar;done++;if(done===2){renderAll();refreshSlides();}});renderSVGToImage(svgText,'#191919',60,function(d,ar){CL_BLACK=d;if(ar)CLIENT_AR=ar;done++;if(done===2){renderAll();refreshSlides();}});});reader.readAsText(e.target.files[0]);});
 var rmBtn=document.getElementById('removeBtn');
-if(rmBtn){rmBtn.addEventListener('click',function(){
-CL_WHITE=null;CL_BLACK=null;CLIENT_AR=2;
-document.getElementById('uploadBtn').classList.remove('loaded');
-document.getElementById('uploadBtn').textContent='\uD83D\uDCD0 Upload Client/Partner Logo';
-this.style.display='none';
-document.getElementById('fileInput').value='';
-renderAll();refreshSlides();
-});}
-document.getElementById('colorPick').addEventListener('input',function(e){
-var hex=e.target.value.replace('#','').toUpperCase();
-C.accent=hex;AH=hex;
-C.accentLight=lightenHex('#'+hex,0.35).replace('#','').toUpperCase();AL=C.accentLight;
-document.getElementById('hexVal').textContent='#'+hex;
-document.getElementById('dlBtn').style.background='#'+hex;
-renderAll();refreshSlides();
-});
-document.getElementById('sizeSlider').addEventListener('input',function(e){
-CLIENT_H_PX=parseInt(e.target.value);
-document.getElementById('szVal').textContent=CLIENT_H_PX;
-renderAll();refreshSlides();
-});
+if(rmBtn){rmBtn.addEventListener('click',function(){CL_WHITE=null;CL_BLACK=null;CLIENT_AR=2;document.getElementById('uploadBtn').classList.remove('loaded');document.getElementById('uploadBtn').textContent='\uD83D\uDCD0 Upload Client/Partner Logo';this.style.display='none';document.getElementById('fileInput').value='';renderAll();refreshSlides();});}
+document.getElementById('colorPick').addEventListener('input',function(e){var hex=e.target.value.replace('#','').toUpperCase();C.accent=hex;AH=hex;C.accentLight=lightenHex('#'+hex,0.35).replace('#','').toUpperCase();AL=C.accentLight;document.getElementById('hexVal').textContent='#'+hex;document.getElementById('dlBtn').style.background='#'+hex;renderAll();refreshSlides();});
+document.getElementById('sizeSlider').addEventListener('input',function(e){CLIENT_H_PX=parseInt(e.target.value);document.getElementById('szVal').textContent=CLIENT_H_PX;renderAll();refreshSlides();});
 }
 }
