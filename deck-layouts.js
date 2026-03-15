@@ -1,5 +1,5 @@
-// VML DECK LAYOUTS v1.5
-// Fixed: card content spacing, card height cap, rows tight mode, stats cap, closing/title
+// VML DECK LAYOUTS v1.6
+// Fixed: title/closing long text threshold and height
 (function(){
 'use strict';
 var _origRenderAll=window.renderAll;
@@ -36,17 +36,18 @@ default:return s.els||[];
 }
 function layoutTitle(s){
 var els=[];
-var tH=(s.title&&s.title.length>40)?1.2:0.7;
+var tH=(s.title&&s.title.length>35)?1.6:0.7;
+var gap=tH>1?0.15:0.3;
 if(s.tag)els.push({type:'t',text:s.tag.toUpperCase(),x:.5,y:2.2,w:11,h:.25,font:'H',size:12,color:'accent'});
 els.push({type:'t',text:s.title||'',x:.5,y:2.55,w:11,h:tH,font:'H',size:44,color:'title'});
-var sY=2.55+tH+0.3;
+var sY=2.55+tH+gap;
 if(s.subtitle){els.push({type:'t',text:s.subtitle,x:.5,y:sY,w:10,h:.4,font:'B',size:22,color:'sub'});sY+=0.4;}
 if(s.description)els.push({type:'t',text:s.description,x:.5,y:sY,w:10,h:.5,font:'B',size:12,color:'body'});
 return els;
 }
 function layoutClosing(s){
 var els=[];
-var tH=(s.title&&s.title.length>40)?1.2:0.7;
+var tH=(s.title&&s.title.length>35)?1.6:0.7;
 els.push({type:'t',text:s.title||'Thank You',x:.5,y:2.6,w:11,h:tH,font:'H',size:44,color:'title'});
 var sY=2.6+tH+0.15;
 if(s.subtitle){els.push({type:'t',text:s.subtitle,x:.5,y:sY,w:10,h:.4,font:'B',size:22,color:'sub'});sY+=0.4;}
