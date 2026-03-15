@@ -1,5 +1,4 @@
-// ═══ VML DECK ENGINE v11.4 ═══
-// v11: chart+tbl+masters. v11.1: footer in masters. v11.2: valign. v11.4: resolveLayouts in dlP
+// ═══ VML DECK ENGINE v11.5 ═══
 
 var C={black:'191919',white:'F5F5F5',dkGray:'363732',mdGray:'53544A',gray:'8B8C81',ltGray:'C2C4B8',accent:AH,accentLight:AL,accentDark:AD};
 var FONT={head:'Snowflake Sans Medium',body:'Snowflake Sans Book'};
@@ -19,7 +18,6 @@ function hexToRgb(h){h=h.replace('#','');return{r:parseInt(h.substr(0,2),16),g:p
 function rgbToHex(r,g,b){return'#'+[r,g,b].map(function(v){var x=Math.round(Math.max(0,Math.min(255,v))).toString(16);return x.length===1?'0'+x:x;}).join('');}
 function lightenHex(h,p){var c=hexToRgb(h);return rgbToHex(c.r+(255-c.r)*p,c.g+(255-c.g)*p,c.b+(255-c.b)*p);}
 
-// ═══ RENDER ═══
 function renderAll(){
 var w=document.getElementById('sw'),h='';
 var noVml=(typeof NO_VML!=='undefined'&&NO_VML);
@@ -38,8 +36,7 @@ else if(el.type==='d'){h+='<div style="position:absolute;left:'+px(el.x)+'px;top
 else if(el.type==='p'){var bg=rc(el.fill||'accent',dk),tc=rc(el.color||'black',dk);h+='<div style="position:absolute;left:'+px(el.x)+'px;top:'+px(el.y)+'px;padding:4px 14px;background:#'+bg+';color:#'+tc+';font-size:'+(el.size||10)+'px;font-weight:500;white-space:nowrap;">'+esc(el.text)+'</div>';}
 else if(el.type==='b'){h+='<div style="position:absolute;left:'+px(el.x)+'px;top:'+px(el.y)+'px;width:'+px(el.w)+'px;height:'+px(el.h)+'px;background:#'+rc(el.fill||'accent',dk)+';"></div>';}
 else if(el.type==='chart'){
-var chartType=el.chartType||'bar';var series=el.data||[];var labels_=(series[0]&&series[0].labels)||[];var numL=labels_.length;
-var cc=(el.opts&&el.opts.chartColors)||['accent','ltGray','dkGray','gray','accentDark'];
+var chartType=el.chartType||'bar';var series=el.data||[];var labels_=(series[0]&&series[0].labels)||[];var numL=labels_.length;var cc=(el.opts&&el.opts.chartColors)||['accent','ltGray','dkGray','gray','accentDark'];
 if(chartType==='bar'){var isStacked=el.opts&&el.opts.barGrouping==='stacked';var isMulti=series.length>1;
 if(isStacked&&isMulti){var totals=[];for(var li=0;li<numL;li++){var tot=0;series.forEach(function(sr){tot+=(sr.values[li]||0);});totals.push(tot);}var maxT=Math.max.apply(null,totals.concat([1]));var barW_=Math.max(Math.round(px(el.w)/numL)-16,30);var avH=px(el.h)*0.7;h+='<div style="position:absolute;left:'+px(el.x)+'px;top:'+px(el.y)+'px;width:'+px(el.w)+'px;height:'+px(el.h)+'px;display:flex;align-items:flex-end;justify-content:space-around;padding:20px 10px 28px;">';for(var li=0;li<numL;li++){var stkH=Math.round((totals[li]/maxT)*avH);h+='<div style="display:flex;flex-direction:column;align-items:center;gap:3px;"><div style="font-size:10px;color:#'+rc('body',dk)+';font-weight:500;">'+totals[li]+'</div><div style="width:'+barW_+'px;height:'+stkH+'px;display:flex;flex-direction:column;">';for(var si=series.length-1;si>=0;si--){var segV=series[si].values[li]||0;var segH=totals[li]>0?Math.round((segV/totals[li])*stkH):0;h+='<div style="height:'+segH+'px;background:#'+rc(cc[si%cc.length]||'accent',dk)+';"></div>';}h+='</div><div style="font-size:8px;color:#'+rc('muted',dk)+';text-align:center;">'+esc(labels_[li]||'')+'</div></div>';}h+='</div>';
 }else{var vals_=(series[0]&&series[0].values)||[];var maxV_=Math.max.apply(null,vals_.concat([1]));var bW=Math.max(Math.round(px(el.w)/Math.max(vals_.length,1))-16,20);var avH3=px(el.h)*0.7;h+='<div style="position:absolute;left:'+px(el.x)+'px;top:'+px(el.y)+'px;width:'+px(el.w)+'px;height:'+px(el.h)+'px;display:flex;align-items:flex-end;justify-content:space-around;padding:20px 10px 28px;">';vals_.forEach(function(v,vi){var bh=Math.max(Math.round((v/maxV_)*avH3),2);h+='<div style="display:flex;flex-direction:column;align-items:center;gap:4px;"><div style="font-size:10px;color:#'+rc('body',dk)+';font-weight:500;">'+v+'</div><div style="width:'+bW+'px;height:'+bh+'px;background:#'+rc(cc[vi%cc.length]||'accent',dk)+';"></div><div style="font-size:8px;color:#'+rc('muted',dk)+';text-align:center;line-height:1.2;">'+esc(labels_[vi]||'')+'</div></div>';});h+='</div>';}}
@@ -52,16 +49,13 @@ h+='<div style="position:absolute;left:29px;bottom:12px;display:flex;align-items
 if(!noVml){h+='<img src="'+(dk?L.wW:L.bW)+'" style="height:17px;">';}
 var cl=dk?CL_WHITE:CL_BLACK;
 if(cl){if(!noVml){h+='<div style="width:4px;height:4px;background:#8B8C81;flex-shrink:0;"></div>';}h+='<img src="'+cl+'" style="height:'+CLIENT_H_PX+'px;object-fit:contain;">';}
-h+='</div>';
-h+='<div style="position:absolute;right:20px;bottom:16px;font-size:7px;color:#'+(dk?C.gray:C.mdGray)+';">Confidential \u00B7 VML</div>';
-h+='</div>';
+h+='</div>';h+='<div style="position:absolute;right:20px;bottom:16px;font-size:7px;color:#'+(dk?C.gray:C.mdGray)+';">Confidential \u00B7 VML</div>';h+='</div>';
 });w.innerHTML=h;}
 function refreshSlides(){var frames=document.querySelectorAll('.sf');frames.forEach(function(f,idx){f.style.display=idx===cur?'block':'none';});document.getElementById('nc').textContent=(cur+1)+' / '+D.length;document.getElementById('hc').textContent='SLIDE '+(cur+1)+' OF '+D.length;}
 function placeImages(){D.forEach(function(s,i){s.els.forEach(function(el){if(el.type==='img'){var container=document.getElementById(el.ref);if(container){var frames=document.querySelectorAll('.sf');if(frames[i]){container.style.position='absolute';container.style.left=px(el.x)+'px';container.style.top=px(el.y)+'px';container.style.width=px(el.w)+'px';container.style.height=px(el.h)+'px';container.style.display='block';frames[i].appendChild(container);}}}});});}
 function aL(sl,dk,pptx){var noVml=(typeof NO_VML!=='undefined'&&NO_VML);var cl=dk?CL_WHITE:CL_BLACK;if(!cl)return;var VML_W_IN=0.68,VML_H_IN=0.21,DOT_SIZE=0.04,CLIENT_H_IN=CLIENT_H_PX/80,CLIENT_W_IN=CLIENT_H_IN*CLIENT_AR;if(!noVml){var dotX=.29+VML_W_IN+0.08,dotY=7.0+(VML_H_IN-DOT_SIZE)/2;sl.addShape(pptx.shapes.RECTANGLE,{x:dotX,y:dotY,w:DOT_SIZE,h:DOT_SIZE,fill:{color:C.gray}});var clX=dotX+DOT_SIZE+0.08,clY=7.0+(VML_H_IN-CLIENT_H_IN)/2;sl.addImage({data:cl,x:clX,y:clY,w:CLIENT_W_IN,h:CLIENT_H_IN});}else{sl.addImage({data:cl,x:.29,y:7.0+(0.21-CLIENT_H_IN)/2,w:CLIENT_W_IN,h:CLIENT_H_IN});}}
 function ms(pptx,s){var dk=s.dark;var sl=pptx.addSlide({masterName:dk?'VML_DARK':'VML_LIGHT'});aL(sl,dk,pptx);if(s.num)sl.addText(s.num,{x:12.3,y:.31,w:.75,h:.2,fontSize:10,fontFace:FONT.head,color:dk?C.white:C.black,align:'right',bold:true,autoFit:true});return sl;}
-async function bs(pptx,s,slideIdx){var sl=ms(pptx,s),dk=s.dark;
-if(!s.els)return;
+async function bs(pptx,s,slideIdx){var sl=ms(pptx,s),dk=s.dark;if(!s.els)return;
 for(var j=0;j<s.els.length;j++){var el=s.els[j];
 if(el.type==='t'){sl.addText(el.text,{x:el.x,y:el.y,w:el.w*FW,h:(el.h||.3)*FH,fontFace:el.font==='H'?FONT.head:FONT.body,fontSize:el.size,color:rc(el.color,dk),valign:el.valign||'top',autoFit:true});}
 else if(el.type==='s'){var opts={x:el.x,y:el.y,w:el.w,h:el.h,fill:{color:rc(el.fill,dk)}};if(el.border)opts.line={color:rc(el.border,dk),width:el.bw||1};sl.addShape(pptx.shapes.RECTANGLE,opts);}
@@ -76,7 +70,6 @@ else if(el.type==='img'){var container=document.getElementById(el.ref);var genIm
 }}
 async function dlP(){var btn=document.getElementById('dlBtn'),st=document.getElementById('st');btn.disabled=true;btn.textContent='Compiling...';try{if(typeof PptxGenJS==='undefined'){st.textContent='Error: PptxGenJS not loaded.';btn.disabled=false;btn.textContent='\u2B07 DOWNLOAD PPTX';return;}var allFrames=document.querySelectorAll('.sf');allFrames.forEach(function(f){f.style.display='block';});st.textContent='Preparing...';await new Promise(function(r){setTimeout(r,1000);});
 var pptx=new PptxGenJS();pptx.layout='LAYOUT_WIDE';pptx.title=document.getElementById('deckTitle').innerText;pptx.subject='VML v'+(typeof PV!=='undefined'?PV:'');pptx.company='WPP - VML';pptx.theme={headFontFace:'Snowflake Sans Medium',bodyFontFace:'Snowflake Sans Book'};
-// v11.4: resolve layouts before PPTX build (critical for image mode)
 if(typeof resolveLayouts==='function')resolveLayouts();
 var noVml=(typeof NO_VML!=='undefined'&&NO_VML);
 var dkObjs=[{rect:{x:.29,y:.55,w:12.75,h:.02,fill:{color:C.accent}}},{text:{text:'Confidential \u00B7 VML',options:{x:8,y:7.0,w:5,h:.25,fontSize:7,fontFace:FONT.body,color:C.gray,align:'right'}}}];
