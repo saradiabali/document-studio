@@ -1,5 +1,5 @@
 // VML DECK LAYOUTS v2.3
-// v2.3: SVG icon support. Icon names resolve via ICONS cache.
+// v2.3: SVG icon support via ICONS global. No async. No fetch.
 (function(){
 'use strict';
 var _origRenderAll=window.renderAll;
@@ -81,5 +81,5 @@ if(s.subtitle)els.push({type:'t',text:s.subtitle,x:.5,y:1.65,w:10,h:.3,font:'B',
 var bulletText=items.map(function(item){return '\u00B7  '+item;}).join('\n');
 els.push({type:'t',text:bulletText,x:.5,y:2.2,w:9.8,h:4.0,font:'B',size:12,color:'body'});return els;}
 window.resolveLayouts=resolveLayouts;
-window.renderAll=function(){resolveLayouts();loadIcons(function(){_origRenderAll();});};
+window.renderAll=function(){resolveLayouts();_origRenderAll();};
 })();
