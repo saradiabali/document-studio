@@ -1,15 +1,17 @@
-// ═══ WPP DOCUMENT ENGINE v1.0 ═══
+// ═══ WPP DOCUMENT ENGINE v1.1 ═══
 // Based on VML DOCUMENT ENGINE v9.7 — modified for WPP brand
-// WPP colors, fonts, footer, logo
+// WPP colors, fonts, footer, logo (SVG path data)
 
 function saveAs(b,n){var a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=n;document.body.appendChild(a);a.click();document.body.removeChild(a);}
 if(typeof AH==='string'&&AH.charAt(0)==='#')AH=AH.substring(1);if(typeof AL==='string'&&AL.charAt(0)==='#')AL=AL.substring(1);if(typeof AD==='string'&&AD.charAt(0)==='#')AD=AD.substring(1);
 var C={black:'000050',white:'FFFFFF',dkGray:'0A1E78',mdGray:'323CAA',gray:'6464D2',ltGray:'D2BEFF',accent:AH,accentLight:AL,accentDark:AD};
 var DF={head:'WPP',body:'WPP'};
 
-// WPP logo via canvas text
-function wppLogo(w,h,fill){var c=document.createElement('canvas');c.width=w*2;c.height=h*2;var x=c.getContext('2d');x.fillStyle=fill;x.font='300 '+Math.round(h*1.2)+'px system-ui,sans-serif';x.textAlign='center';x.textBaseline='middle';x.fillText('wpp',w,h);return c.toDataURL('image/png');}
-var L={bW:wppLogo(150,52,'#000050'),bI:null};
+// WPP logo SVG path data
+var VP={w:{vB:'0 0 392 126',p:['M82.48,2.46L59.09,95.16,42.49,28.7h-0.37L25.61,95.16,2.04,2.46H22.42l14.33,60.72L52.7,2.46h12.68l16.5,60.72L96.02,2.46h19.83L82.48,2.46ZM130.96,2.46h36.63c22.38,0,36.17,12.87,36.17,33.34,0,20.65-13.79,33.52-36.17,33.52H151.14v53.95H130.96V2.46ZM151.14,51.19h13.42c12.5,0,19.46-6.41,19.46-15.39,0-8.98-6.96-15.21-19.46-15.21H151.14v30.6ZM221.47,2.46h36.63c22.38,0,36.17,12.87,36.17,33.34,0,20.65-13.79,33.52-36.17,33.52H241.65v53.95H221.47V2.46ZM241.65,51.19h13.42c12.5,0,19.46-6.41,19.46-15.39,0-8.98-6.96-15.21-19.46-15.21H241.65v30.6Z']}};
+function rl(p,w,h,f){try{var c=document.createElement('canvas');c.width=w*2;c.height=h*2;var x=c.getContext('2d');var v=p.vB.split(/[\s,]+/).map(Number);var s=Math.min(w*2/v[2],h*2/v[3]);x.translate((w*2-v[2]*s)/2,(h*2-v[3]*s)/2);x.scale(s,s);x.fillStyle=f;p.p.forEach(function(d){x.fill(new Path2D(d));});return c.toDataURL('image/png');}catch(e){return null;}}
+var L={bW:rl(VP.w,150,52,'#000050'),bI:null};
+
 function d2u(d){if(!d)return null;var b=atob(d.split(',')[1]),a=new Uint8Array(b.length);for(var i=0;i<b.length;i++)a[i]=b.charCodeAt(i);return a;}
 function esc(s){if(!s)return '';var d=document.createElement('div');d.textContent=s;return d.innerHTML.replace(/\n/g,'<br>');}
 function rc(k){return C[k]||k;}
@@ -57,7 +59,7 @@ case 'pb':ch.push(pa([tr(' ')],{pb:true,a:0,ln:240}));break;
 }});
 // WPP header
 var hdrCh=[new docx.Paragraph({children:[mkImg(wData,70,22,'WPP')],spacing:{after:0,line:240}}),new docx.Paragraph({children:[],border:{bottom:{style:docx.BorderStyle.SINGLE,size:4,color:ac,space:12}},spacing:{after:120,line:240}})];
-// WPP footer: "PRIVATE & CONFIDENTIAL" left, page number right
+// WPP footer
 var ftrCh=[new docx.Paragraph({children:[],border:{top:{style:docx.BorderStyle.SINGLE,size:4,color:ac,space:12}},spacing:{before:120,after:0,line:240}})];
 var fr=[new docx.TextRun({text:'PRIVATE & CONFIDENTIAL',font:DF.body,size:14,color:C.gray}),new docx.TextRun({children:["\t"],font:DF.body,size:14}),new docx.TextRun({children:[docx.PageNumber.CURRENT],font:DF.body,size:16,color:C.gray})];
 ftrCh.push(new docx.Paragraph({children:fr,spacing:{line:240},tabStops:[{type:docx.TabStopType.RIGHT,position:9840}]}));

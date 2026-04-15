@@ -1,13 +1,14 @@
-// ═══ WPP DECK ENGINE v1.0 ═══
+// ═══ WPP DECK ENGINE v1.1 ═══
 // Based on VML DECK ENGINE v11.8 — modified for WPP brand
-// WPP colors, fonts, footer, logo, masters
+// WPP colors, fonts, footer, logo (SVG path data), masters
 
 var C={black:'000050',white:'FFFFFF',dkGray:'0A1E78',mdGray:'323CAA',gray:'6464D2',ltGray:'D2BEFF',accent:AH,accentLight:AL,accentDark:AD};
 var FONT={head:'WPP',body:'WPP'};
 
-// WPP logo via canvas text (replace with SVG path data when available)
-function wppLogo(w,h,fill){var c=document.createElement('canvas');c.width=w*2;c.height=h*2;var x=c.getContext('2d');x.fillStyle=fill;x.font='300 '+Math.round(h*1.2)+'px system-ui,sans-serif';x.textAlign='center';x.textBaseline='middle';x.fillText('wpp',w,h);return c.toDataURL('image/png');}
-var L={wW:wppLogo(150,52,'#FFFFFF'),bW:wppLogo(150,52,'#000050'),wI:null,bI:null};
+// WPP logo SVG path data (from WPP_2020_logo.svg)
+var VP={w:{vB:'0 0 392 126',p:['M82.48,2.46L59.09,95.16,42.49,28.7h-0.37L25.61,95.16,2.04,2.46H22.42l14.33,60.72L52.7,2.46h12.68l16.5,60.72L96.02,2.46h19.83L82.48,2.46ZM130.96,2.46h36.63c22.38,0,36.17,12.87,36.17,33.34,0,20.65-13.79,33.52-36.17,33.52H151.14v53.95H130.96V2.46ZM151.14,51.19h13.42c12.5,0,19.46-6.41,19.46-15.39,0-8.98-6.96-15.21-19.46-15.21H151.14v30.6ZM221.47,2.46h36.63c22.38,0,36.17,12.87,36.17,33.34,0,20.65-13.79,33.52-36.17,33.52H241.65v53.95H221.47V2.46ZM241.65,51.19h13.42c12.5,0,19.46-6.41,19.46-15.39,0-8.98-6.96-15.21-19.46-15.21H241.65v30.6Z']}};
+function rl(p,w,h,f){try{var c=document.createElement('canvas');c.width=w*2;c.height=h*2;var x=c.getContext('2d');var v=p.vB.split(/[\s,]+/).map(Number);var s=Math.min(w*2/v[2],h*2/v[3]);x.translate((w*2-v[2]*s)/2,(h*2-v[3]*s)/2);x.scale(s,s);x.fillStyle=f;p.p.forEach(function(d){x.fill(new Path2D(d));});return c.toDataURL('image/png');}catch(e){return null;}}
+var L={wW:rl(VP.w,150,52,'#FFFFFF'),bW:rl(VP.w,150,52,'#000050'),wI:null,bI:null};
 
 var PPI=80;var FW=1.0;var FH=1.08;
 function px(v){return Math.round(v*PPI);}
@@ -23,14 +24,11 @@ function rgbToHex(r,g,b){return'#'+[r,g,b].map(function(v){var x=Math.round(Math
 function lightenHex(h,p){var c=hexToRgb(h);return rgbToHex(c.r+(255-c.r)*p,c.g+(255-c.g)*p,c.b+(255-c.b)*p);}
 
 // ═══ WPP renderSlideHTML ═══
-// Differences from VML: no accent bar, no top-left icon, WPP footer structure
 function renderSlideHTML(s){
 var dk=s.dark;var numColor=dk?'#FFFFFF':'#000050';
 var noWpp=(typeof NO_WPP!=='undefined'&&NO_WPP);
 var h='';
-// WPP: no accent bar
 h+='<div class="sn" style="color:'+numColor+';font-weight:600;">'+(s.num||'')+'</div>';
-// WPP: no top-left icon (L.wI is null)
 s.els.forEach(function(el){
 if(el.type==='t'){var vs=el.valign==='middle'?'display:flex;align-items:center;':el.valign==='bottom'?'display:flex;align-items:flex-end;':'';h+='<div style="position:absolute;left:'+px(el.x)+'px;top:'+px(el.y)+'px;width:'+px(el.w)+'px;'+(el.h?'height:'+px(el.h)+'px;':'')+vs+'font-size:'+el.size+'px;color:#'+rc(el.color,dk)+';font-weight:'+(el.font==='H'?'300':'400')+';line-height:1.4;">'+esc(el.text)+'</div>';}
 else if(el.type==='s'){var bdr=el.border?'border:'+(el.bw||1)+'px solid #'+rc(el.border,dk)+';':'';h+='<div style="position:absolute;left:'+px(el.x)+'px;top:'+px(el.y)+'px;width:'+px(el.w)+'px;height:'+px(el.h)+'px;background:#'+rc(el.fill,dk)+';'+(el.transparency?'opacity:'+(1-el.transparency/100)+';':'')+bdr+'"></div>';}
@@ -52,10 +50,8 @@ else if(chartType==='line'||chartType==='area'){var allVals=[];series.forEach(fu
 else{h+='<div style="position:absolute;left:'+px(el.x)+'px;top:'+px(el.y)+'px;width:'+px(el.w)+'px;height:'+px(el.h)+'px;display:flex;align-items:center;justify-content:center;background:#'+(dk?C.dkGray:'F8F8F6')+';border:1px dashed #'+rc('muted',dk)+';"><div style="font-size:11px;color:#'+rc('muted',dk)+';text-align:center;">'+esc((chartType||'').toUpperCase())+' Chart</div></div>';}}
 else if(el.type==='tbl'){h+='<div style="position:absolute;left:'+px(el.x)+'px;top:'+px(el.y)+'px;width:'+px(el.w)+'px;height:'+px(el.h)+'px;overflow:hidden;"><table style="width:100%;border-collapse:collapse;font-size:10px;">';if(el.headers){h+='<tr>';el.headers.forEach(function(hd){h+='<th style="background:#'+C.accent+';color:#fff;padding:6px 10px;text-align:left;font-weight:500;">'+esc(hd)+'</th>';});h+='</tr>';}(el.rows||[]).forEach(function(row,ri){h+='<tr style="background:'+(ri%2===0?(dk?'#0A1E78':'#f8f8f6'):'transparent')+'">';row.forEach(function(cell){h+='<td style="padding:5px 10px;border-bottom:1px solid '+(dk?'#323CAA':'#eee')+';color:#'+rc('body',dk)+';">'+esc(String(cell))+'</td>';});h+='</tr>';});h+='</table></div>';}
 });
-// ═══ WPP FOOTER ═══
-// Left: "PRIVATE & CONFIDENTIAL"
+// ═══ WPP FOOTER: left text, right logo ═══
 h+='<div style="position:absolute;left:29px;bottom:16px;font-size:7px;color:#'+(dk?'D2BEFF':'6464D2')+';">PRIVATE & CONFIDENTIAL</div>';
-// Right: WPP logo + client logo
 h+='<div style="position:absolute;right:50px;bottom:12px;display:flex;align-items:center;gap:8px;">';
 var cl=dk?CL_WHITE:CL_BLACK;
 if(cl){h+='<img src="'+cl+'" style="height:'+CLIENT_H_PX+'px;object-fit:contain;">';h+='<div style="width:4px;height:4px;background:#6464D2;flex-shrink:0;"></div>';}
