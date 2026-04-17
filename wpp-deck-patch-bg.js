@@ -1,118 +1,120 @@
-// ═══ WPP DECK ENGINE v1.1 → v1.2 PATCH ═══
-// Adds support for the 'bg' element type — full-bleed decorative backgrounds
-// used by the new WPP-signature layouts (title-wpp, section-wpp, quote-wpp,
-// hero-wpp) and the auto-injected dot-pattern texture on content slides.
+// ═══ WPP DECK ENGINE PATCH v1.1 ═══
+// Fixes TWO bugs in the existing wpp-deck.js engine:
 //
-// Apply by:
-//   1. Append this file (or inline its contents) AFTER wpp-deck.js loads
-//   2. It monkey-patches renderSlideHTML and the PPTX slide builder to
-//      recognize {type:'bg', ref:'ASSET_KEY'} elements
+// 1. LOGO NEVER RENDERED — the canvas-based rl(VP.w, ...) rendering of the
+//    massive embedded SVG path was silently failing (try/catch returning null).
+//    We now override L.wW and L.bW with pre-rendered PNGs from wpp-assets.js
+//    which are higher quality anyway.
+//
+// 2. NO BG-ELEMENT SUPPORT — new v2 layouts emit {type:'bg', ref:'ASSET_KEY'}
+//    elements for dot-pattern textures and hero imagery. The base engine didn't
+//    know about these. We patch renderSlideHTML and the ms() slide builder
+//    so backgrounds render in both preview and downloaded PPTX.
+//
+// Apply by loading AFTER wpp-deck.js in the artifact template.
 //
 // CDN loading order:
 //   <script src="wpp-assets.js"></script>
 //   <script src="pptxgen.bundle.js"></script>
 //   <script src="wpp-deck.js"></script>
-//   <script src="wpp-deck-patch-bg.js"></script>   ← this file
+//   <script src="wpp-deck-patch-bg.js"></script>   ← THIS FILE
 //   <script src="icons.js"></script>
 //   <script src="wpp-deck-layouts-v2.js"></script>
 //   <script src="wpp-deck-shell.js"></script>
 
 (function(){
 'use strict';
-if (!window.WPP_ASSETS) { console.error('[WPP patch] WPP_ASSETS missing'); return; }
 
-// ── HTML PREVIEW PATCH ──────────────────────────────────────────
-// The original renderSlideHTML builds an HTML string. We wrap it to
-// detect 'bg' elements and emit a full-bleed absolutely-positioned
-// <img> BEFORE other content, so it sits at the back z-index.
+if (!window.WPP_ASSETS) {
+  console.error('[WPP patch] WPP_ASSETS missing — wpp-assets.js must load before this patch');
+  return;
+}
+
+// ── FIX 1: Logo never rendered ──────────────────────────────────
+// The original engine does: var L = {wW: rl(VP.w,150,52,'#FFFFFF'), bW: rl(VP.w,150,52,'#000050'), ...}
+// rl() attempts canvas-based SVG path rendering which silently returns null on failure.
+// Override the L global with pre-rendered, correctly-colored PNG wordmarks from wpp-assets.js
+if (typeof window.L === 'object' && window.L !== null) {
+  window.L.wW = window.WPP_ASSETS.WM_WHITE;
+  window.L.bW = window.WPP_ASSETS.WM_NAVY;
+  console.log('[WPP patch] logo override applied: L.wW and L.bW now use pre-rendered PNGs');
+} else {
+  console.error('[WPP patch] window.L not found — wpp-deck.js must load before this patch');
+}
+
+// ── FIX 2: Background-element support (for v2 layouts) ──────────
+// New v2 layouts emit {type:'bg', ref:'ASSET_KEY'} elements. Teach the engine
+// to render them as full-bleed backgrounds in both HTML preview and PPTX.
+
 var _origRenderSlideHTML = window.renderSlideHTML;
-window.renderSlideHTML = function(s) {
-  var bgHtml = '';
-  // Find any bg elements and render them as full-bleed images
-  (s.els || []).forEach(function(el){
-    if (el.type === 'bg') {
-      var src = window.WPP_ASSETS[el.ref];
-      if (src) {
-        var opacity = el.opacity != null ? el.opacity : 1;
-        bgHtml += '<img src="' + src + '" style="position:absolute;left:0;top:0;width:1066px;height:600px;object-fit:cover;opacity:' + opacity + ';pointer-events:none;z-index:0;">';
+if (typeof _origRenderSlideHTML === 'function') {
+  window.renderSlideHTML = function(s) {
+    var bgHtml = '';
+    (s.els || []).forEach(function(el){
+      if (el.type === 'bg') {
+        var src = window.WPP_ASSETS[el.ref];
+        if (src) {
+          var opacity = el.opacity != null ? el.opacity : 1;
+          bgHtml += '<img src="' + src + '" style="position:absolute;left:0;top:0;width:1066px;height:600px;object-fit:cover;opacity:' + opacity + ';pointer-events:none;z-index:0;">';
+        }
       }
-    }
-  });
-  // Filter bg out of the regular render loop (so it doesn't try to draw text etc)
-  var originalEls = s.els;
-  s.els = (s.els || []).filter(function(el){ return el.type !== 'bg'; });
-  var rest = _origRenderSlideHTML(s);
-  s.els = originalEls;
-  // Wrap rest to ensure it renders above the bg layer
-  // (z-index:1 on a wrapper div; but simpler: just prepend bgHtml — the
-  // later-declared absolutely-positioned elements naturally sit on top)
-  return bgHtml + rest;
-};
+    });
+    var originalEls = s.els;
+    s.els = (s.els || []).filter(function(el){ return el.type !== 'bg'; });
+    var rest = _origRenderSlideHTML(s);
+    s.els = originalEls;
+    return bgHtml + rest;
+  };
+} else {
+  console.error('[WPP patch] renderSlideHTML not found — patch cannot install HTML preview hook');
+}
 
-// ── PPTX COMPILATION PATCH ──────────────────────────────────────
-// Monkey-patch bs() to handle 'bg' as a full-bleed addImage before
-// any other elements. Since bs() is defined as a top-level function,
-// we wrap it.
+// PPTX side — hook ms() so that when a slide has a bg element, we attach it
+// to the slide BEFORE other content is added. Then strip bg from s.els so the
+// main bs() loop ignores it.
+var _origMs = window.ms;
 var _origBs = window.bs;
-window.bs = async function(pptx, s, slideIdx) {
-  // Pre-process: extract bg elements and add them to the slide first
-  if (s.els && s.els.length) {
-    // We need a reference to the slide object; easiest is to build our
-    // own mini-pipeline: create the slide via ms(), add backgrounds, then
-    // let bs() handle the rest WITHOUT calling ms() again.
-    // But bs() calls ms() internally — so instead we inject bg handling
-    // by intercepting. Cleaner approach: add bg elements to a temporary
-    // field, let bs() run, then post-add. But PptxGenJS requires bg be
-    // added to slide, not pptx-level.
-    //
-    // Simplest safe approach: filter bg out before calling _origBs,
-    // then manually add them to the slide after. Since _origBs creates
-    // the slide internally via ms(), we need a different pattern.
-    //
-    // Solution: re-implement the slide-creation header inline here,
-    // then delegate el-rendering to a helper.
-  }
-  // Since we can't easily get a handle to the internal slide object,
-  // we take a different path: add bg as a slide background via
-  // pptxgenjs's native background image support, which we inject
-  // by appending to s a background override BEFORE calling the original.
-  var bgEl = null;
-  if (s.els) {
+
+if (typeof _origMs === 'function' && typeof _origBs === 'function') {
+  function extractBg(s) {
+    if (!s.els || !s.els.length) return;
+    var bgEl = null;
     for (var i = 0; i < s.els.length; i++) {
       if (s.els[i].type === 'bg') { bgEl = s.els[i]; break; }
     }
-  }
-  if (bgEl) {
-    var src = window.WPP_ASSETS[bgEl.ref];
-    if (src) {
-      // Use pptxgenjs background:{data:...} — set on slide via _bgOverride
-      // But ms() creates the slide. We need to hook it.
-      s._bgData = src;
-      // Remove bg from els so the original bs loop doesn't try to render it
+    if (bgEl) {
+      var src = window.WPP_ASSETS[bgEl.ref];
+      if (src) s._bgData = src;
       s.els = s.els.filter(function(el){ return el.type !== 'bg'; });
     }
   }
-  // Call the original bs
-  return await _origBs(pptx, s, slideIdx);
-};
 
-// Patch ms() to apply the background data when _bgData is set
-var _origMs = window.ms;
-window.ms = function(pptx, s) {
-  var sl = _origMs(pptx, s);
-  if (s._bgData) {
-    // PptxGenJS exposes slide.background — set it to a data URI
-    try {
-      sl.background = { data: s._bgData };
-    } catch(e) {
-      // Fallback: add as first image element covering full slide
+  window.bs = async function(pptx, s, slideIdx) {
+    extractBg(s);
+    return await _origBs(pptx, s, slideIdx);
+  };
+
+  window.ms = function(pptx, s) {
+    var sl = _origMs(pptx, s);
+    if (s._bgData) {
+      var applied = false;
       try {
-        sl.addImage({ data: s._bgData, x: 0, y: 0, w: 13.33, h: 7.5 });
-      } catch(e2) {}
+        sl.background = { data: s._bgData };
+        applied = true;
+      } catch (e) { /* fall through */ }
+      if (!applied) {
+        try {
+          sl.addImage({ data: s._bgData, x: 0, y: 0, w: 13.33, h: 7.5 });
+        } catch (e) {
+          console.error('[WPP patch] background image failed:', e);
+        }
+      }
     }
-  }
-  return sl;
-};
+    return sl;
+  };
+} else {
+  console.error('[WPP patch] ms/bs not found — patch cannot install PPTX hooks');
+}
 
-console.log('[WPP patch] bg-element support loaded');
+console.log('[WPP patch] v1.1 loaded (logo fix + bg-element support)');
 })();
