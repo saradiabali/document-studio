@@ -1,24 +1,23 @@
-// ═══ WPP DECK LAYOUTS v2.0 ═══
-// Drop-in replacement for wpp-deck-layouts.js v1.0
-// Adds FOUR signature WPP layouts backed by real template assets:
-//   - title-wpp      : Navy circles cover (matches template slide 4)
-//   - section-wpp    : Numbered section divider with quarter-circle (matches slides 11-14)
-//   - quote-wpp      : Centered large-format pull quote (matches slide 18)
-//   - hero-wpp       : Full-bleed dotted-glass imagery (matches slides 5-7, 13-14, 36-39)
+// ═══ WPP DECK LAYOUTS v2.1 ═══
+// Drop-in replacement for wpp-deck-layouts.js
 //
-// All existing layouts (title, closing, cards, stats, split, rows, detail,
-// bullets, statement) continue to work identically. The D-array contract
-// is unchanged — existing decks keep compiling.
-//
-// Layouts that ALREADY EXISTED have been upgraded to use dot-pattern
-// backgrounds (via WPP_ASSETS.DOTS_LIGHT/DOTS_DARK) automatically.
+// Changes vs v2.0 (fixes 10 issues from real-world test):
+//   - Cover (title-wpp): CORRECT circle positions (big top-right, big bottom-LEFT,
+//     small wordmark circle bottom-right). Title auto-UPPERCASE at 54pt.
+//     Narrowed title column to 7.5" so it doesn't overflow into the top-right circle.
+//     Dotted background added.
+//   - Closing: same three-circle system as cover. Title auto-UPPERCASE.
+//     Wordmark renders INSIDE the small bottom-right circle.
+//   - Content layouts (cards/stats/split/rows/detail/bullets): NO dotted background.
+//     Real template reserves dots for covers, closings, section dividers, statements only.
+//   - Page numbers: content slides now auto-assign s.num so the base engine renders them.
 //
 // Dependencies: wpp-assets.js MUST load before this file.
 
 (function(){
 'use strict';
 if (!window.WPP_ASSETS) {
-  console.error('[WPP v2] wpp-assets.js must load before wpp-deck-layouts-v2.js');
+  console.error('[WPP v2.1] wpp-assets.js must load before wpp-deck-layouts-v2.js');
 }
 var A = window.WPP_ASSETS || {};
 var _origRenderAll = window.renderAll;
@@ -32,29 +31,24 @@ var GRIDS = {
 function makeGrid(n){var gap=0.3;var w=(12.33-gap*(n-1))/n;var g=[];for(var i=0;i<n;i++)g.push({x:0.5+i*(w+gap),w:w});return g;}
 
 // ── Shared helpers ──────────────────────────────────────────────
-
-// Background dots layer — first element so it sits at the back
-function bgDots(dark){
-  return {type:'bg', ref: dark ? 'DOTS_DARK' : 'DOTS_LIGHT'};
-}
-
-// Navy decorative circle (matches template slide 4, 6, 7, 11)
-// cx/cy = center in inches, r = radius
-function navyCircle(cx, cy, r){
-  return {type:'o', x:cx-r, y:cy-r, w:r*2, h:r*2, fill:'000050'};
-}
+function bgDots(dark){ return { type:'bg', ref: dark ? 'DOTS_DARK' : 'DOTS_LIGHT' }; }
+function navyCircle(cx, cy, r){ return { type:'o', x:cx-r, y:cy-r, w:r*2, h:r*2, fill:'000050' }; }
+function pageNum(idx){ return ('0'+(idx+1)).slice(-2); }
 
 function resolveLayouts(){
   for (var i=0; i<D.length; i++) {
     var s = D[i];
     if (s.layout && !s._resolved) {
-      // Auto-set dark mode for specific layouts
-      if (s.layout === 'title' || s.layout === 'title-wpp') { s.dark = 1; s.num = ''; }
-      if (s.layout === 'closing')                           { s.dark = 1; s.num = ''; }
-      if (s.layout === 'statement' || s.layout === 'quote-wpp') { s.dark = 0; s.num = ''; }
-      if (s.layout === 'section-wpp' && s.dark === undefined) { s.dark = 0; }
-      if (s.layout === 'hero-wpp' && s.dark === undefined)    { s.dark = 0; s.num = ''; }
+      if (s.layout === 'title' || s.layout === 'title-wpp')   { s.dark = 0; s.num = ''; }
+      if (s.layout === 'closing')                              { s.dark = 0; s.num = ''; }
+      if (s.layout === 'statement' || s.layout === 'quote-wpp'){ s.dark = 0; s.num = ''; }
+      if (s.layout === 'section-wpp' && s.dark === undefined)  { s.dark = 0; }
+      if (s.layout === 'hero-wpp' && s.dark === undefined)     { s.dark = 0; s.num = ''; }
       if (s.dark === undefined) s.dark = 0;
+      // Auto-assign page number for content slides if caller didn't set one
+      if (s.num === undefined || s.num === null) {
+        s.num = pageNum(i);
+      }
       s.els = buildLayout(s);
       s._resolved = true;
     }
@@ -63,181 +57,131 @@ function resolveLayouts(){
 
 function buildLayout(s){
   switch (s.layout) {
-    // ── New WPP signature layouts ──
     case 'title-wpp':   return layoutTitleWPP(s);
     case 'section-wpp': return layoutSectionWPP(s);
     case 'quote-wpp':   return layoutQuoteWPP(s);
     case 'hero-wpp':    return layoutHeroWPP(s);
-    // ── Existing layouts (upgraded with dot backgrounds) ──
-    case 'title':    return layoutTitle(s);
-    case 'closing':  return layoutClosing(s);
-    case 'statement':return layoutStatement(s);
-    case 'cards':    return layoutCards(s);
-    case 'stats':    return layoutStats(s);
-    case 'split':    return layoutSplit(s);
-    case 'rows':     return layoutRows(s);
-    case 'detail':   return layoutDetail(s);
-    case 'bullets':  return layoutBullets(s);
-    default:         return s.els || [];
+    case 'title':       return layoutTitleWPP(s); // delegate legacy to title-wpp
+    case 'closing':     return layoutClosing(s);
+    case 'statement':   return layoutStatement(s);
+    case 'cards':       return layoutCards(s);
+    case 'stats':       return layoutStats(s);
+    case 'split':       return layoutSplit(s);
+    case 'rows':        return layoutRows(s);
+    case 'detail':      return layoutDetail(s);
+    case 'bullets':     return layoutBullets(s);
+    default:            return s.els || [];
   }
 }
 
-// ═══════════════════════════════════════════════════════════════
-// NEW: title-wpp — Navy circles cover (matches template slide 4)
-// Two offset navy circles, WPP wordmark lives inside bottom-right
-// circle, title top-left in 54pt light. Dark bg default.
-// ═══════════════════════════════════════════════════════════════
+// The three-circle branded composition used by cover + closing.
+// Big navy circle top-right (cut by edge), big navy circle bottom-LEFT (cut by edge),
+// small navy circle bottom-right with WPP wordmark inside.
+function brandedCirclesWithWordmark(){
+  return [
+    navyCircle(11.5, -0.8, 4.5),    // big top-right
+    navyCircle(-1.5, 8.0, 4.2),     // big bottom-left
+    navyCircle(12.3, 6.9, 1.1),     // small bottom-right (wordmark container)
+    // white wordmark, positioned to sit inside the small circle
+    { type:'img-asset', ref:'WM_WHITE', x: 11.5, y: 6.65, w: 1.6, h: 0.48 }
+  ];
+}
+
+// ═══ title-wpp ═══════════════════════════════════════════════════
 function layoutTitleWPP(s){
-  var els = [];
-  // Big navy circle top-right, cut off by edge
-  els.push(navyCircle(11.0, -0.3, 4.2));
-  // Smaller navy circle bottom-right (wordmark sits inside this one via footer)
-  els.push(navyCircle(11.5, 7.3, 1.8));
-  // Dot pattern texture on the white area only — light bg underneath
-  // (title-wpp has dark=1 so the whole slide goes navy; circles become a tonal accent)
-  // Actually: override dark to 0 and use navy circles as the brand element
-  s.dark = 0;
-  // Title top-left, 54pt light
-  var tH = (s.title && s.title.length > 40) ? 1.6 : 0.9;
-  els.push({type:'t', text: s.title || '', x: 0.5, y: 0.6, w: 8.5, h: tH, font:'H', size: 54, color:'title'});
-  // Subtitle mid-left
-  var y = 0.6 + tH + 0.3;
+  var els = [bgDots(0)];
+  brandedCirclesWithWordmark().forEach(function(e){ els.push(e); });
+  var title = (s.title || '').toUpperCase();
+  var tH = (title.length > 40) ? 1.8 : 1.0;
+  els.push({ type:'t', text: title, x: 0.5, y: 0.6, w: 7.2, h: tH, font:'H', size: 54, color:'title' });
+  var y = 0.6 + tH + 0.25;
   if (s.subtitle) {
-    els.push({type:'t', text: s.subtitle, x: 0.5, y: y, w: 8, h: 0.5, font:'B', size: 20, color:'sub'});
-    y += 0.6;
+    els.push({ type:'t', text: s.subtitle, x: 0.5, y: y, w: 7, h: 0.5, font:'B', size: 20, color:'sub' });
   }
-  // Date / presenter — bottom-left above footer
-  if (s.date) els.push({type:'t', text: s.date, x: 0.5, y: 5.9, w: 6, h: 0.3, font:'B', size: 12, color:'body'});
-  if (s.presenter) els.push({type:'t', text: s.presenter, x: 0.5, y: 6.2, w: 6, h: 0.3, font:'B', size: 12, color:'body'});
+  if (s.date)      els.push({ type:'t', text: s.date,      x: 0.5, y: 5.9, w: 6, h: 0.3, font:'B', size: 12, color:'body' });
+  if (s.presenter) els.push({ type:'t', text: s.presenter, x: 0.5, y: 6.2, w: 6, h: 0.3, font:'B', size: 12, color:'body' });
   return els;
 }
 
-// ═══════════════════════════════════════════════════════════════
-// NEW: section-wpp — Numbered section divider (template slides 11-14)
-// Big "01." numeral top-left at 72pt, three-line title bottom-left
-// at 60pt, quarter-circle decoration right side
-// ═══════════════════════════════════════════════════════════════
+// ═══ section-wpp ═════════════════════════════════════════════════
 function layoutSectionWPP(s){
-  var els = [];
-  // Dot pattern background (subtle)
-  els.push(bgDots(0));
-  // Quarter-circle decoration — big navy quarter on right side
+  var els = [bgDots(0)];
   els.push(navyCircle(10.5, 1.5, 3.5));
-  // Section number top-left — "01.", "02.", etc.
-  var num = s.number || s.num || '01.';
+  var num = s.number || s.num || '01';
   if (!/\.$/.test(num)) num = num + '.';
-  els.push({type:'t', text: num, x: 0.5, y: 0.55, w: 3, h: 1.2, font:'H', size: 72, color:'title'});
-  // Title bottom-left — up to three lines, 60pt light
+  els.push({ type:'t', text: num, x: 0.5, y: 0.55, w: 3, h: 1.2, font:'H', size: 72, color:'title' });
   var title = s.title || '';
-  var titleH = 2.4;
-  var titleY = 6.85 - titleH - 0.1;
-  els.push({type:'t', text: title, x: 0.5, y: titleY, w: 7.5, h: titleH, font:'H', size: 60, color:'title', valign:'bottom'});
-  // Clear num field so the default page-number renderer doesn't duplicate it
+  var titleY = 6.85 - 2.4 - 0.1;
+  els.push({ type:'t', text: title, x: 0.5, y: titleY, w: 7.5, h: 2.4, font:'H', size: 60, color:'title', valign:'bottom' });
   s.num = '';
   return els;
 }
 
-// ═══════════════════════════════════════════════════════════════
-// NEW: quote-wpp — Pull quote (matches template slide 18)
-// Centered large quote, attribution small-caps below, no card bg
-// ═══════════════════════════════════════════════════════════════
+// ═══ quote-wpp ══════════════════════════════════════════════════
 function layoutQuoteWPP(s){
-  var els = [];
-  els.push(bgDots(0));
+  var els = [bgDots(0)];
   var quote = s.quote || s.title || '';
-  // Wrap in smart quotes if not already
   if (quote && !/^[\u201C"]/.test(quote)) quote = '\u201C' + quote + '\u201D';
-  // Centered 40pt light, leave room for attribution below
-  els.push({type:'t', text: quote, x: 1.5, y: 1.5, w: 10.33, h: 3.8, font:'H', size: 40, color:'title', valign:'middle', align:'center'});
+  els.push({ type:'t', text: quote, x: 1.5, y: 1.5, w: 10.33, h: 3.8, font:'H', size: 40, color:'title', valign:'middle', align:'center' });
   if (s.attribution) {
-    els.push({type:'t', text: s.attribution.toUpperCase(), x: 1.5, y: 5.5, w: 10.33, h: 0.4, font:'H', size: 11, color:'sub', align:'center'});
+    els.push({ type:'t', text: s.attribution.toUpperCase(), x: 1.5, y: 5.5, w: 10.33, h: 0.4, font:'H', size: 11, color:'sub', align:'center' });
   }
   return els;
 }
 
-// ═══════════════════════════════════════════════════════════════
-// NEW: hero-wpp — Full-bleed decorative imagery (slides 5-7, 13-14, 36-39)
-// Uses one of HERO_FLOWING / HERO_BLUE / HERO_DOTS / HERO_SOFT
-// Title overlays the image. Optional variant via s.hero field
-// ═══════════════════════════════════════════════════════════════
+// ═══ hero-wpp ═══════════════════════════════════════════════════
 function layoutHeroWPP(s){
   var els = [];
   var variant = (s.hero || 'dots').toLowerCase();
-  var heroMap = {
-    flowing: 'HERO_FLOWING',
-    blue:    'HERO_BLUE',
-    dots:    'HERO_DOTS',
-    soft:    'HERO_SOFT'
-  };
-  var ref = heroMap[variant] || 'HERO_DOTS';
-  // Full-bleed hero image
-  els.push({type:'bg', ref: ref});
-  // Title placement varies by section_title vs cover style
+  var heroMap = { flowing:'HERO_FLOWING', blue:'HERO_BLUE', dots:'HERO_DOTS', soft:'HERO_SOFT' };
+  els.push({ type:'bg', ref: heroMap[variant] || 'HERO_DOTS' });
   if (s.style === 'left-split') {
-    // Title left, image visible right (template slide 36-39)
-    // We approximate by letting title sit in a darker left panel — but since
-    // we can't mask the image, place title bottom-left with a subtle text shadow
-    if (s.tag) els.push({type:'t', text: s.tag.toUpperCase(), x: 0.5, y: 5.0, w: 6, h: 0.3, font:'H', size: 11, color:'sub'});
-    els.push({type:'t', text: s.title || '', x: 0.5, y: 5.4, w: 7, h: 1.3, font:'H', size: 40, color:'title'});
+    if (s.tag) els.push({ type:'t', text: s.tag.toUpperCase(), x: 0.5, y: 5.0, w: 6, h: 0.3, font:'H', size: 11, color:'sub' });
+    els.push({ type:'t', text: s.title || '', x: 0.5, y: 5.4, w: 7, h: 1.3, font:'H', size: 40, color:'title' });
   } else {
-    // Centered section-title style — title sits over image
     if (s.number || s.num) {
       var num = s.number || s.num;
       if (!/\.$/.test(num)) num = num + '.';
-      els.push({type:'t', text: num, x: 0.5, y: 0.55, w: 3, h: 1.2, font:'H', size: 56, color:'title'});
+      els.push({ type:'t', text: num, x: 0.5, y: 0.55, w: 3, h: 1.2, font:'H', size: 56, color:'title' });
     }
-    els.push({type:'t', text: s.title || '', x: 0.5, y: 4.8, w: 7.5, h: 1.8, font:'H', size: 52, color:'title', valign:'bottom'});
+    els.push({ type:'t', text: s.title || '', x: 0.5, y: 4.8, w: 7.5, h: 1.8, font:'H', size: 52, color:'title', valign:'bottom' });
   }
   s.num = '';
   return els;
 }
 
-// ═══════════════════════════════════════════════════════════════
-// EXISTING layouts — kept almost identical, with dot-pattern background
-// added to light content slides for WPP brand consistency
-// ═══════════════════════════════════════════════════════════════
-
-function layoutTitle(s){
-  var els = [];
-  // Upgrade: add navy circles instead of plain dark fill
-  els.push(navyCircle(11.0, -0.3, 4.2));
-  els.push(navyCircle(11.5, 7.3, 1.8));
-  s.dark = 0; // override — circles carry the brand, bg stays white
-  var tH = (s.title && s.title.length > 40) ? 1.2 : 0.7;
-  var y = 2.6;
-  if (s.tag) { els.push({type:'t', text: s.tag.toUpperCase(), x:.5, y:y, w:11, h:.3, font:'H', size:12, color:'sub'}); y += 0.5; }
-  els.push({type:'t', text: s.title || '', x:.5, y:y, w:8.5, h:tH, font:'H', size:44, color:'title'}); y += tH + 0.25;
-  if (s.subtitle) { var subH=(s.subtitle.length>60)?0.8:0.4; els.push({type:'t', text:s.subtitle, x:.5, y:y, w:8, h:subH, font:'B', size:18, color:'sub'}); y += subH+0.2; }
-  if (s.description) els.push({type:'t', text:s.description, x:.5, y:y, w:8, h:.4, font:'B', size:12, color:'body'});
-  return els;
-}
-
+// ═══ closing ═══════════════════════════════════════════════════
 function layoutClosing(s){
-  var els = [];
-  // Closing slide uses navy circles like the cover (matches template slide 41)
-  els.push(navyCircle(0, 7.5, 2.8));
-  els.push(navyCircle(11.2, -0.5, 2.2));
-  s.dark = 0;
-  var tH = (s.title && s.title.length > 40) ? 1.2 : 0.7;
+  var els = [bgDots(0)];
+  brandedCirclesWithWordmark().forEach(function(e){ els.push(e); });
+  var title = (s.title || 'Thank you.').toUpperCase();
+  var tH = (title.length > 40) ? 1.8 : 1.0;
   var y = 2.6;
-  els.push({type:'t', text: s.title || 'Thank you.', x:.5, y:y, w:8, h:tH, font:'H', size:44, color:'title'});
+  els.push({ type:'t', text: title, x: 0.5, y: y, w: 7.5, h: tH, font:'H', size: 54, color:'title' });
   y += tH + 0.3;
-  if (s.subtitle) { var subH=(s.subtitle.length>60)?0.8:0.4; els.push({type:'t', text:s.subtitle, x:.5, y:y, w:8, h:subH, font:'B', size:16, color:'sub'}); y += subH+0.2; }
-  if (s.attribution) els.push({type:'t', text:s.attribution, x:.5, y:y, w:8, h:.4, font:'B', size:12, color:'body'});
+  if (s.subtitle) {
+    els.push({ type:'t', text: s.subtitle, x: 0.5, y: y, w: 7.5, h: 0.5, font:'B', size: 16, color:'sub' });
+    y += 0.55;
+  }
+  if (s.attribution) {
+    els.push({ type:'t', text: s.attribution, x: 0.5, y: y, w: 7.5, h: 0.5, font:'B', size: 12, color:'body' });
+  }
   return els;
 }
 
+// ═══ statement ═════════════════════════════════════════════════
 function layoutStatement(s){
   return [
     bgDots(0),
-    {type:'t', text: s.title||'', x:1.5, y:1.5, w:10.33, h:4.5, font:'H', size:52, color:'title', valign:'middle'}
+    { type:'t', text: s.title||'', x:1.5, y:1.5, w:10.33, h:4.5, font:'H', size:52, color:'title', valign:'middle' }
   ];
 }
+
+// ═══ content layouts (NO dotted bg) ════════════════════════════
 
 function layoutCards(s){
   var els=[]; var items=s.items||[]; var cols=s.columns||Math.min(items.length,4);
   var grid = GRIDS[cols] || makeGrid(cols);
-  els.push(bgDots(s.dark));
   els.push({type:'t', text:s.title||'', x:.5, y:.75, w:11, h:.5, font:'H', size:36, color:'title'});
   if (s.subtitle) els.push({type:'t', text:s.subtitle, x:.5, y:1.35, w:10, h:.3, font:'B', size:13, color:'sub'});
   var nRows = Math.ceil(items.length/cols); var gap = 0.25; var hasNote = !!s.footnote;
@@ -272,7 +216,6 @@ function layoutStats(s){
   var els=[]; var items=s.items||[]; var cols=s.columns||2;
   var nRows = s.rows || Math.ceil(items.length/cols);
   var grid = GRIDS[cols] || makeGrid(cols);
-  els.push(bgDots(s.dark));
   els.push({type:'t', text:s.title||'', x:.5, y:.75, w:11, h:.5, font:'H', size:36, color:'title'});
   if (s.subtitle) els.push({type:'t', text:s.subtitle, x:.5, y:1.35, w:10, h:.3, font:'B', size:13, color:'sub'});
   var gap=0.25; var totalH=6.0-2.2; var rawH=(totalH-(nRows-1)*gap)/nRows;
@@ -304,7 +247,6 @@ function layoutStats(s){
 
 function layoutSplit(s){
   var els=[]; var items=s.items||[];
-  els.push(bgDots(s.dark));
   els.push({type:'t', text:s.title||'', x:.5, y:.75, w:11, h:.5, font:'H', size:36, color:'title'});
   if (s.subtitle) els.push({type:'t', text:s.subtitle, x:.5, y:1.35, w:10, h:.3, font:'B', size:13, color:'sub'});
   var positions=[{x:.5,w:5.9},{x:6.9,w:5.9}];
@@ -320,7 +262,6 @@ function layoutSplit(s){
 
 function layoutRows(s){
   var els=[]; var items=s.items||[]; var numbered=s.numbered!==false;
-  els.push(bgDots(s.dark));
   els.push({type:'t', text:s.title||'', x:.5, y:.75, w:11, h:.5, font:'H', size:36, color:'title'});
   if (s.subtitle) els.push({type:'t', text:s.subtitle, x:.5, y:1.35, w:10, h:.3, font:'B', size:13, color:'sub'});
   var startY=2.0, totalH=6.0-startY, gap=0.12;
@@ -343,7 +284,6 @@ function layoutRows(s){
 
 function layoutDetail(s){
   var els=[]; var items=s.items||[];
-  els.push(bgDots(s.dark));
   els.push({type:'t', text:s.title||'', x:.5, y:.75, w:11, h:.5, font:'H', size:36, color:'title'});
   if (s.subtitle) els.push({type:'t', text:s.subtitle, x:.5, y:1.35, w:10, h:.3, font:'B', size:13, color:'sub'});
   var cardX=2.5, cardW=8.3, itemH=0.7, pad=0.3;
@@ -362,7 +302,6 @@ function layoutDetail(s){
 
 function layoutBullets(s){
   var els=[]; var items=s.items||[];
-  els.push(bgDots(s.dark));
   els.push({type:'t', text:s.title||'', x:.5, y:.75, w:11, h:.5, font:'H', size:36, color:'title'});
   if (s.subtitle) els.push({type:'t', text:s.subtitle, x:.5, y:1.35, w:10, h:.3, font:'B', size:13, color:'sub'});
   var bulletText=items.map(function(item){return '\u2022  '+item;}).join('\n');
