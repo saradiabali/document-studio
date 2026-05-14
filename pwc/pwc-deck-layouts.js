@@ -49,15 +49,11 @@ els.push({type:'cover-bg'});
 els.push({type:'cover-logo'});
 
 // Title — valign top (not bottom), no subtitle
-els.push({type:'t',text:s.title||'',x:0.413,y:2.116,w:6.195,h:2.0,font:'H',size:44,color:'title',valign:'top'});
+els.push({type:'t',text:s.title||'',x:0.413,y:2.116,w:6.195,h:2.0,font:'H',size:48,color:'title',valign:'top'});
 
 // Name + date — 14pt, position: x=1.02cm=0.40", y=16.89cm=6.65"
-var bottomText='';
-if(s.presenter&&s.date) bottomText='Presentation by '+s.presenter+'\n'+s.date;
-else if(s.presenter) bottomText='Presentation by '+s.presenter;
-else if(s.date) bottomText=s.date;
-if(bottomText){
-  els.push({type:'t',text:bottomText,x:0.40,y:6.65,w:5.16,h:0.5,font:'B',size:14,color:'body',valign:'top'});
+if(s.presenter||s.date){
+els.push({type:'cover-meta',presenter:s.presenter||'',date:s.date||''});
 }
 return els;
 }
@@ -65,24 +61,11 @@ return els;
 // ═══ PwC CLOSING — cream background, thank you, contact info ═══
 function layoutClosing(s){
 var els=[];
-// No cover-bg (no parallelograms), no cover-logo, no footer
-// Just gradient background
 els.push({type:'closing-bg'});
 
-// Title
-els.push({type:'t',text:s.title||'Thank you.',x:0.413,y:2.116,w:6.195,h:2.0,font:'H',size:44,color:'title',valign:'top'});
+els.push({type:'t',text:s.title||'Thank you.',x:0.413,y:2.116,w:6.195,h:2.0,font:'H',size:66,color:'title',valign:'top'});
 
-var y=4.3;
-if(s.subtitle){
-  var subH=(s.subtitle.length>60)?0.7:0.4;
-  els.push({type:'t',text:s.subtitle,x:0.413,y:y,w:6.195,h:subH,font:'B',size:16,color:'sub'});
-  y+=subH+0.15;
-}
-if(s.attribution){
-  els.push({type:'t',text:s.attribution,x:0.413,y:y,w:6.195,h:0.4,font:'B',size:12,color:'body'});
-}
-
-// "pwc.com" — Georgia bold 16pt, x=1.02cm=0.40", y=17.27cm=6.80"
+// pwc.com — Georgia bold 16pt
 els.push({type:'t',text:'pwc.com',x:0.40,y:6.80,w:3,h:0.4,font:'H',size:16,color:'title'});
 
 return els;
@@ -124,7 +107,7 @@ var cream = s.style === 'cream';
 if(cream) els.push({type:'s',x:0,y:0,w:13.33,h:7.5,fill:'FFE8D4'});
 
 // "Agenda" title — bottom-left, large serif
-els.push({type:'t',text:s.title||'Agenda',x:0.429,y:2.952,w:4.574,h:2.726,font:'H',size:48,color:'title',valign:'bottom'});
+els.push({type:'t',text:s.title||'Agenda',x:0.429,y:2.952,w:4.574,h:2.726,font:'H',size:60,color:'title',valign:'bottom'});
 
 // Agenda table — right side
 var items = s.items || [];
