@@ -46,51 +46,43 @@ function buildLayout(s){
 function layoutTitle(s){
 var els=[];
 els.push({type:'cover-bg'});
-// Full-color PwC logo — top-left (x:0.40, y:0.40, w:1.35, h:0.66)
 els.push({type:'cover-logo'});
 
-var y=1.8;
-  if(s.tag){
-    els.push({type:'t',text:s.tag.toUpperCase(),x:.6,y:y,w:10,h:.3,font:'B',size:10,color:'accent'});
-    y+=0.45;
-  }
-  var tH=(s.title&&s.title.length>40)?1.4:0.85;
-  els.push({type:'t',text:s.title||'',x:.6,y:y,w:9,h:tH,font:'H',size:44,color:'title'});
-  y+=tH+0.25;
+var tH=2.0;
+els.push({type:'t',text:s.title||'',x:0.413,y:2.116,w:6.195,h:tH,font:'H',size:44,color:'title',valign:'bottom'});
 
-  if(s.subtitle){
-    var subH=(s.subtitle.length>60)?0.7:0.4;
-    els.push({type:'t',text:s.subtitle,x:.6,y:y,w:9,h:subH,font:'B',size:18,color:'sub'});
-    y+=subH+0.15;
-  }
-  if(s.description){
-    els.push({type:'t',text:s.description,x:.6,y:y,w:9,h:.4,font:'B',size:12,color:'body'});
-  }
-  // Date + presenter bottom-left
-  if(s.date)      els.push({type:'t',text:'Presentation by '+(s.presenter||''),x:.6,y:5.6,w:7,h:.3,font:'B',size:11,color:'body'});
-  if(s.date)      els.push({type:'t',text:s.date,x:.6,y:5.9,w:7,h:.3,font:'B',size:11,color:'body'});
-  return els;
+if(s.subtitle){
+  els.push({type:'t',text:s.subtitle,x:0.413,y:4.3,w:6.195,h:0.5,font:'B',size:18,color:'sub'});
+}
+
+var bottomText='';
+if(s.presenter&&s.date) bottomText='Presentation by '+s.presenter+'\n'+s.date;
+else if(s.presenter) bottomText='Presentation by '+s.presenter;
+else if(s.date) bottomText=s.date;
+if(bottomText){
+  els.push({type:'t',text:bottomText,x:0.403,y:6.649,w:5.16,h:0.448,font:'B',size:11,color:'body',valign:'bottom'});
+}
+return els;
 }
 
 // ═══ PwC CLOSING — cream background, thank you, contact info ═══
 function layoutClosing(s){
-  var els=[];
-  els.push({type:'cover-bg'});
-  els.push({type:'cover-logo'}); 
+var els=[];
+els.push({type:'cover-bg'});
+els.push({type:'cover-logo'});
 
-  var tH=(s.title&&s.title.length>40)?1.4:0.85;
-  var y=2.4;
-  els.push({type:'t',text:s.title||'Thank you.',x:.6,y:y,w:9,h:tH,font:'H',size:44,color:'title'});
-  y+=tH+0.3;
-  if(s.subtitle){
-    var subH=(s.subtitle.length>60)?0.7:0.4;
-    els.push({type:'t',text:s.subtitle,x:.6,y:y,w:9,h:subH,font:'B',size:16,color:'sub'});
-    y+=subH+0.15;
-  }
-  if(s.attribution){
-    els.push({type:'t',text:s.attribution,x:.6,y:y,w:9,h:.4,font:'B',size:12,color:'body'});
-  }
-  return els;
+var tH=2.0;
+els.push({type:'t',text:s.title||'Thank you.',x:0.413,y:2.116,w:6.195,h:tH,font:'H',size:44,color:'title',valign:'bottom'});
+var y=4.3;
+if(s.subtitle){
+  var subH=(s.subtitle.length>60)?0.7:0.4;
+  els.push({type:'t',text:s.subtitle,x:0.413,y:y,w:6.195,h:subH,font:'B',size:16,color:'sub'});
+  y+=subH+0.15;
+}
+if(s.attribution){
+  els.push({type:'t',text:s.attribution,x:0.413,y:y,w:6.195,h:0.4,font:'B',size:12,color:'body'});
+}
+return els;
 }
 
 // ═══ PwC DIVIDER — matches template exactly
