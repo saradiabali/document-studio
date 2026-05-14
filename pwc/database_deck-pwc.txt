@@ -142,9 +142,9 @@ WRONG: number:'01' (zero-padded)      RIGHT: number:'1' (PwC uses plain numerals
 <script>var AH='E05C14',AL='F2996A',AD='C2400A';var PV='11.8';</script>
 <script src="https://cdn.jsdelivr.net/gh/gitbrent/pptxgenjs/dist/pptxgen.bundle.js"></script>
 <script src="https://cdn.jsdelivr.net/gh/saradiabali/document-studio@5.4/deck.js"></script>
-<script src="https://cdn.jsdelivr.net/gh/saradiabali/document-studio@pwc1.0/pwc-deck.js"></script>
-<script src="https://cdn.jsdelivr.net/gh/saradiabali/document-studio@pwc1.0/pwc-deck-layouts.js"></script>
-<script src="https://cdn.jsdelivr.net/gh/saradiabali/document-studio@pwc1.0/pwc-deck-shell.js"></script>
+<script src="https://cdn.jsdelivr.net/gh/saradiabali/document-studio/pwc/pwc-deck.js"></script>
+<script src="https://cdn.jsdelivr.net/gh/saradiabali/document-studio/pwc/pwc-deck-layouts.js"></script>
+<script src="https://cdn.jsdelivr.net/gh/saradiabali/document-studio/pwc/pwc-deck-shell.js"></script>
 <script src="https://cdn.jsdelivr.net/gh/saradiabali/document-studio@5.4/icons.js"></script>
 <script>var D=[__D_ARRAY__];</script>
 <div id="sw">
