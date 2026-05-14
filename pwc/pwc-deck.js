@@ -124,13 +124,7 @@ sl.addShape(pptx.shapes.PARALLELOGRAM,{x:8.774,y:3.750,w:4.107,h:0.857,fill:{col
 }else{
 sl=pptx.addSlide({masterName:'PwC_LIGHT'});
 }
-aL(sl,dk,pptx);if(s.num)sl.addText(s.num,{x:11.5,y:6.95,w:1,h:.25,fontSize:9,fontFace:'Arial',color:'595959',align:'right'});return sl;}if(isCover){
-sl.background={data:COVER_BG};
-sl.addShape(pptx.shapes.PARALLELOGRAM,{x:4.665,y:4.625,w:4.106,h:0.858,fill:{color:'FA510A'},line:{type:'none'}});
-sl.addShape(pptx.shapes.PARALLELOGRAM,{x:8.774,y:3.750,w:4.107,h:0.857,fill:{color:'FA510A'},line:{type:'none'}});
-}else if(isClosing){
-sl.background={data:COVER_BG};}
-aL(sl,dk,pptx);if(s.num)sl.addText(s.num,{x:11.5,y:6.95,w:1,h:.25,fontSize:9,fontFace:'Arial',color:'595959',align:'right'});return sl;}async function bs(pptx,s,slideIdx){var sl=ms(pptx,s),dk=s.dark;if(!s.els)return;
+aL(sl,dk,pptx);if(s.num)sl.addText(s.num,{x:11.5,y:6.95,w:1,h:.25,fontSize:9,fontFace:'Arial',color:'595959',align:'right'});return sl;}
 for(var j=0;j<s.els.length;j++){var el=s.els[j];
 if(el.type==='cover-bg'||el.type==='closing-bg'){continue;}
 else if(el.type==='t'){var tw=Math.min(el.w*FW,12.83-el.x);sl.addText(el.text,{x:el.x,y:el.y,w:tw,h:(el.h||.3)*FH,fontFace:el.font==='H'?FONT.head:FONT.body,fontSize:el.size,color:rc(el.color,dk),valign:el.valign||'top',margin:0,autoFit:true});}
