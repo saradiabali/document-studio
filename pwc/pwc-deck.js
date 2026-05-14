@@ -12,18 +12,31 @@ var L={wW:rl(VP.w,150,52,'#FFFFFF'),bW:rl(VP.w,150,52,'#1A1A1A'),wI:null,bI:null
 // Full-color PwC logo for cover slides (black text + orange marks)
 var COVER_LOGO=(function(){
 var vb=VP.w.vB.split(/[\s,]+/).map(Number);
-var w=300,h=104;
+// Render large, then crop to actual content bounds
+var tw=600,th=600;
 var c=document.createElement('canvas');
-c.width=w;c.height=h;
+c.width=tw;c.height=th;
 var ctx=c.getContext('2d');
-var s=Math.min(w/vb[2],h/vb[3]);
-ctx.translate((w-vb[2]*s)/2,(h-vb[3]*s)/2);
+var s=Math.min(tw/vb[2],th/vb[3]);
+ctx.translate((tw-vb[2]*s)/2,(th-vb[3]*s)/2);
 ctx.scale(s,s);
 ctx.fillStyle='#1A1A1A';
 ctx.fill(new Path2D(VP.w.p[0]));
 ctx.fillStyle='#E05C14';
 ctx.fill(new Path2D(VP.w.p[1]));
-return c.toDataURL('image/png');
+// Find actual pixel bounds
+var data=ctx.getImageData(0,0,tw,th).data;
+var top=th,left=tw,bot=0,right=0;
+for(var y=0;y<th;y++)for(var x=0;x<tw;x++){
+if(data[(y*tw+x)*4+3]>10){if(x<left)left=x;if(x>right)right=x;if(y<top)top=y;if(y>bot)bot=y;}}
+var pad=4;
+left=Math.max(0,left-pad);top=Math.max(0,top-pad);
+right=Math.min(tw-1,right+pad);bot=Math.min(th-1,bot+pad);
+var cw=right-left+1,ch=bot-top+1;
+var cr=document.createElement('canvas');
+cr.width=cw;cr.height=ch;
+cr.getContext('2d').drawImage(c,left,top,cw,ch,0,0,cw,ch);
+return cr.toDataURL('image/png');
 })();
 // ═══ PwC Cover Gradient Background ═══
 // Renders once on load, used for title/closing slides
