@@ -1,0 +1,166 @@
+#PwC BRAND OVERRIDES
+When user specifies PwC brand, these rules OVERRIDE deck-core-dual VML defaults.
+All other deck-core-dual rules still apply: workflow, density limits, composition, title length limits, technical rules.
+
+##PwC Colors
+Core: Black=1A1A1A, White=FFFFFF, Cream=F7EFE9.
+Orange: OrangeDark=C2400A, OrangeMid=E05C14, OrangeLight=F2996A, OrangePale=F7DDD1.
+Neutral: DkGray=2D2D2D, MdGray=595959, Gray=8C8C8C, LtGray=D9D9D9.
+Tertiary(charts/data viz only): Blue=1F3864, Teal=006072, Green=375623, Purple=4B1C69.
+
+##PwC Accent Defaults
+NO color family auto-detection for PwC. Always use orange:
+AH='E05C14', AL='F2996A', AD='C2400A'.
+User can override with specific hex. If user names a sector/practice, stay on orange.
+
+##PwC Color Keys(override VML keys)
+ALL slides light: title=1A1A1A, body=595959, sub=E05C14, muted=8C8C8C, accent=AH, accentLt=AL, accentDk=AD, cardBg=FFFFFF, cardBorder=D9D9D9.
+Cream slides(title/closing/divider): bg=F7EFE9, title=1A1A1A, body=595959, accent=E05C14.
+Status colors: ok=28A745, warn=E67E00, bad=C12638.
+
+##PwC Dark/Light Rules
+PwC is a LIGHT-ONLY brand. ALL slides use light(FFFFFF) background.
+Title slide=CREAM(F7EFE9). Closing=CREAM(F7EFE9). Divider=CREAM(F7EFE9).
+Content slides=WHITE(FFFFFF). NEVER use dark slides.
+No dark:1 on any slide in the D array.
+
+##PwC Fonts
+H=Georgia(serif)—used for headlines, titles, large statement text. PwC's brand uses ITC Charter; Georgia is the closest web-safe fallback.
+B=Arial—used for body, captions, labels.
+Slide numbers: all slides #E05C14 (orange).
+Footer: "PwC" in black, left-aligned, 9pt Georgia bold.
+
+##PwC Footer
+Left: "PwC" wordmark (handled by engine).
+Right: page number in orange.
+PPTX masters: PwC_LIGHT (only one master needed).
+PPTX filename: 'PwC_[Title].pptx'.
+No accent bar at top — PwC engine uses left-side vertical orange bar on cards/rows only.
+
+##PwC Source/Citation
+In layout shortcuts: footnote:'Source: PwC Analysis, 2026'.
+In raw els: {type:'t',text:'Source: ...',x:0.5,y:6.5,w:8,h:0.3,font:'B',size:9,color:'muted'}.
+
+##PwC Closing Slide
+{layout:'closing',title:'Thank you.',subtitle:'For more information:',attribution:'Name · Role · email@pwc.com'}
+
+##PwC Chart Colors
+Primary: chartColors:['E05C14','C2400A','F2996A','F7DDD1'].
+Multi-series: chartColors:['E05C14','1F3864','006072','375623'].
+Data-heavy: mix orange + sector colors for distinction.
+
+##PwC Artifact Template
+<html><head></head><body>
+<script>var AH='E05C14',AL='F2996A',AD='C2400A';var PV='11.8';</script>
+<script src="https://cdn.jsdelivr.net/gh/gitbrent/pptxgenjs/dist/pptxgen.bundle.js"></script>
+<script src="https://cdn.jsdelivr.net/gh/saradiabali/document-studio@5.4/deck.js"></script>
+<script src="https://cdn.jsdelivr.net/gh/saradiabali/document-studio@pwc1.0/pwc-deck.js"></script>
+<script src="https://cdn.jsdelivr.net/gh/saradiabali/document-studio@5.4/icons.js"></script>
+<script src="https://cdn.jsdelivr.net/gh/saradiabali/document-studio@pwc1.0/pwc-deck-layouts.js"></script>
+<script src="https://cdn.jsdelivr.net/gh/saradiabali/document-studio@pwc1.0/pwc-deck-shell.js"></script>
+<script>
+var D=[__D_ARRAY__];
+deckInit({title:'__TITLE__'});
+</script>
+</body></html>
+
+##PwC Layout Selection Rules
+Cover → title (auto cream bg, orange left bar)
+Section dividers → divider (cream bg, large orange number top-right)
+Multi-item grids → cards (2/3/4 cols, serif card titles)
+Number-led callouts → stats
+Long-form comparisons → split
+Process/numbered steps → rows
+Key-value facts → detail
+Simple lists → bullets
+Closing → closing (auto cream bg)
+
+##PwC Layout Schemas — MANDATORY REFERENCE
+
+###title (PwC cover)
+{layout:'title', title:'Required', subtitle:'optional', tag:'optional', description:'optional', date:'optional', presenter:'optional'}
+  Auto cream background. Orange left accent bar. Georgia serif title.
+  DO NOT set dark:1
+
+###closing
+{layout:'closing', title:'Thank you.', subtitle:'optional', attribution:'Name · Role · email@pwc.com'}
+  Auto cream background. Same structure as cover.
+
+###divider (PwC section break)
+{layout:'divider', number:'1', title:'Section title here', tag:'optional section label', num:''}
+  Cream background. Large orange number top-right (1, 2, 3 — not "01").
+  Title sits bottom-left in large Georgia serif.
+  ALWAYS set num:'' to suppress page number (section numbers ARE the number).
+
+###cards
+{layout:'cards', title:'Required', items:[
+  {title:'Card 1', text:'Body copy.'},
+  {title:'Card 2', text:'Body copy.', sub:'Optional subheading'}
+], columns:3, tag:'optional', subtitle:'optional', footnote:'optional'}
+  items: REQUIRED. Each: {title, text, icon?, sub?, pill?}
+  text: body copy — DO NOT use 'body', 'description', 'desc'
+
+###stats
+{layout:'stats', title:'Required', items:[
+  {value:'42%', label:'Metric Name', text:'Supporting description.'},
+  {value:'$1.1T', label:'Another Metric', text:'Supporting description.'}
+], columns:2, tag:'optional', subtitle:'optional', footnote:'optional'}
+  items: REQUIRED. Each: {value, label, text}
+  value: the big number — DO NOT use 'number', 'stat'
+
+###split
+{layout:'split', title:'Required', items:[
+  {title:'Left heading', text:'Long-form content 3+ sentences.'},
+  {title:'Right heading', text:'Long-form content 3+ sentences.'}
+], tag:'optional', subtitle:'optional', footnote:'optional'}
+
+###rows
+{layout:'rows', title:'Required', items:[
+  {title:'Step 1', text:'Description.'},
+  {title:'Step 2', text:'Description.'}
+], numbered:true, tag:'optional', subtitle:'optional', footnote:'optional'}
+
+###detail
+{layout:'detail', title:'Required', items:[
+  {label:'Key', value:'Value', icon:'optional'},
+  {label:'Key', value:'Value'}
+], tag:'optional', subtitle:'optional', footnote:'optional'}
+
+###bullets
+{layout:'bullets', title:'Required', items:['Point one', 'Point two', 'Point three'], tag:'optional', subtitle:'optional'}
+  items: REQUIRED array of STRINGS
+
+##Common Mistakes (DO NOT MAKE THESE)
+WRONG: dark:1 on any PwC slide       RIGHT: omit dark entirely (defaults to 0)
+WRONG: cards:[...]                    RIGHT: items:[...]
+WRONG: body:'...'                     RIGHT: text:'...'
+WRONG: layout:'section'               RIGHT: layout:'divider'
+WRONG: number:'01' (zero-padded)      RIGHT: number:'1' (PwC uses plain numerals)
+
+##PwC Image Mode Template
+<html><head></head><body>
+<script>var AH='E05C14',AL='F2996A',AD='C2400A';var PV='11.8';</script>
+<script src="https://cdn.jsdelivr.net/gh/gitbrent/pptxgenjs/dist/pptxgen.bundle.js"></script>
+<script src="https://cdn.jsdelivr.net/gh/saradiabali/document-studio@5.4/deck.js"></script>
+<script src="https://cdn.jsdelivr.net/gh/saradiabali/document-studio@pwc1.0/pwc-deck.js"></script>
+<script src="https://cdn.jsdelivr.net/gh/saradiabali/document-studio@pwc1.0/pwc-deck-layouts.js"></script>
+<script src="https://cdn.jsdelivr.net/gh/saradiabali/document-studio@pwc1.0/pwc-deck-shell.js"></script>
+<script src="https://cdn.jsdelivr.net/gh/saradiabali/document-studio@5.4/icons.js"></script>
+<script>var D=[__D_ARRAY__];</script>
+<div id="sw">
+<div class="sf lt" style="display:block;">
+<div class="sn" style="color:#E05C14;font-weight:600;"></div>
+<div style="position:absolute;left:29px;bottom:12px;font-size:9px;color:#1A1A1A;font-weight:600;">PwC</div>
+</div>
+<div class="sf lt" style="display:none;">
+<div class="sn" style="color:#E05C14;font-weight:600;">1</div>
+<div style="position:absolute;left:29px;bottom:12px;font-size:9px;color:#1A1A1A;font-weight:600;">PwC</div>
+</div>
+<div class="sf lt" style="display:none;">
+<div class="sn" style="color:#E05C14;font-weight:600;"></div>
+<div style="position:absolute;left:29px;bottom:12px;font-size:9px;color:#1A1A1A;font-weight:600;">PwC</div>
+</div>
+</div>
+<script>deckInit({title:'__TITLE__',imageMode:true});</script>
+</body></html>
+No dark slides in PwC image mode. All slides use class="sf lt".
