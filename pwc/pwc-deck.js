@@ -129,17 +129,6 @@ sl.addShape(pptx.shapes.PARALLELOGRAM,{x:8.774,y:3.750,w:4.107,h:0.857,fill:{col
 }
 }else{
 sl=pptx.addSlide({masterName:'PwC_LIGHT'});
-sl.addText(String(slideIdx),{x:12,y:6.95,w:1,h:.25,fontSize:10.5,fontFace:'Arial',color:'1A1A1A',align:'right'});
-}
-aL(sl,dk,pptx);return sl;}if(isCover||isClosing){
-sl=pptx.addSlide({masterName:'PwC_COVER'});
-sl.background={data:COVER_BG};
-if(isCover){
-sl.addShape(pptx.shapes.PARALLELOGRAM,{x:4.665,y:4.625,w:4.106,h:0.858,fill:{color:'FA510A'},line:{type:'none'}});
-sl.addShape(pptx.shapes.PARALLELOGRAM,{x:8.774,y:3.750,w:4.107,h:0.857,fill:{color:'FA510A'},line:{type:'none'}});
-}
-}else{
-sl=pptx.addSlide({masterName:'PwC_LIGHT'});
 }
 aL(sl,dk,pptx);return sl;}async function bs(pptx,s,slideIdx){var sl=ms(pptx,s,slideIdx),dk=s.dark;if(!s.els)return;
 for(var j=0;j<s.els.length;j++){var el=s.els[j];
