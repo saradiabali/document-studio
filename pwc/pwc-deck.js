@@ -84,8 +84,8 @@ h+='<div style="position:absolute;right:20px;bottom:14px;font-size:9px;color:#1A
 }
 else if(el.type==='cover-bg'){
 h+='<div style="position:absolute;left:0;top:0;width:100%;height:100%;background:linear-gradient(to top right,#FFFFFF,#FEAF8F);"></div>';
-h+='<div style="position:absolute;left:'+px(4.67)+'px;top:'+px(4.63)+'px;width:'+px(0.86)+'px;height:'+px(4.11)+'px;background:#FA510A;transform:skewX(-12deg);"></div>';
-h+='<div style="position:absolute;left:'+px(8.78)+'px;top:'+px(3.75)+'px;width:'+px(0.86)+'px;height:'+px(4.11)+'px;background:#FA510A;transform:skewX(-12deg);"></div>';
+h+='<div style="position:absolute;left:'+px(4.665)+'px;top:'+px(4.625)+'px;width:'+px(4.106)+'px;height:'+px(0.858)+'px;background:#FA510A;transform:skewX(-12deg);"></div>';
+h+='<div style="position:absolute;left:'+px(8.774)+'px;top:'+px(3.750)+'px;width:'+px(4.107)+'px;height:'+px(0.857)+'px;background:#FA510A;transform:skewX(-12deg);"></div>';
 }});
 var deckTitle=document.getElementById('deckTitle')?document.getElementById('deckTitle').innerText:'';
 h+='<div style="position:absolute;left:29px;bottom:14px;font-size:9px;color:#595959;font-family:Arial,sans-serif;">'+esc(deckTitle)+'</div>';
@@ -95,8 +95,13 @@ h+='</div>';});w.innerHTML=h;}
 function refreshSlides(){var frames=document.querySelectorAll('.sf');frames.forEach(function(f,idx){f.style.display=idx===cur?'block':'none';});document.getElementById('nc').textContent=(cur+1)+' / '+D.length;document.getElementById('hc').textContent='SLIDE '+(cur+1)+' OF '+D.length;}
 function placeImages(){D.forEach(function(s,i){s.els.forEach(function(el){if(el.type==='img'){var container=document.getElementById(el.ref);if(container){var frames=document.querySelectorAll('.sf');if(frames[i]){container.style.position='absolute';container.style.left=px(el.x)+'px';container.style.top=px(el.y)+'px';container.style.width=px(el.w)+'px';container.style.height=px(el.h)+'px';container.style.display='block';frames[i].appendChild(container);}}}});});}
 function aL(sl,dk,pptx){var noPwc=(typeof NO_PWC!=='undefined'&&NO_PWC);var cl=CL_BLACK;if(!cl)return;var CLIENT_H_IN=CLIENT_H_PX/80,CLIENT_W_IN=CLIENT_H_IN*CLIENT_AR;sl.addImage({data:cl,x:.29,y:6.55,w:CLIENT_W_IN,h:CLIENT_H_IN});}
-function ms(pptx,s){var dk=s.dark;var isCover=(s.layout==='title'||s.layout==='closing');var sl;if(isCover){sl=pptx.addSlide({masterName:'PwC_LIGHT'});sl.background={data:COVER_BG};sl.addShape(pptx.shapes.PARALLELOGRAM,{x:4.67,y:4.63,w:0.86,h:4.11,fill:{color:'FA510A'},line:{type:'none'}});sl.addShape(pptx.shapes.PARALLELOGRAM,{x:8.78,y:3.75,w:0.86,h:4.11,fill:{color:'FA510A'},line:{type:'none'}});}else{sl=pptx.addSlide({masterName:'PwC_LIGHT'});}aL(sl,dk,pptx);if(s.num)sl.addText(s.num,{x:11.5,y:6.95,w:1,h:.25,fontSize:9,fontFace:'Arial',color:'595959',align:'right'});return sl;}
-async function bs(pptx,s,slideIdx){var sl=ms(pptx,s),dk=s.dark;if(!s.els)return;
+function ms(pptx,s){var dk=s.dark;var isCover=(s.layout==='title'||s.layout==='closing');var sl=pptx.addSlide({masterName:'PwC_LIGHT'});
+if(isCover){
+sl.background={data:COVER_BG};
+sl.addShape(pptx.shapes.PARALLELOGRAM,{x:4.665,y:4.625,w:4.106,h:0.858,fill:{color:'FA510A'},line:{type:'none'}});
+sl.addShape(pptx.shapes.PARALLELOGRAM,{x:8.774,y:3.750,w:4.107,h:0.857,fill:{color:'FA510A'},line:{type:'none'}});
+}
+aL(sl,dk,pptx);if(s.num)sl.addText(s.num,{x:11.5,y:6.95,w:1,h:.25,fontSize:9,fontFace:'Arial',color:'595959',align:'right'});return sl;}async function bs(pptx,s,slideIdx){var sl=ms(pptx,s),dk=s.dark;if(!s.els)return;
 for(var j=0;j<s.els.length;j++){var el=s.els[j];
 if(el.type==='t'){var tw=Math.min(el.w*FW,12.83-el.x);sl.addText(el.text,{x:el.x,y:el.y,w:tw,h:(el.h||.3)*FH,fontFace:el.font==='H'?FONT.head:FONT.body,fontSize:el.size,color:rc(el.color,dk),valign:el.valign||'top',margin:0,autoFit:true});}
 else if(el.type==='s'){var opts={x:el.x,y:el.y,w:el.w,h:el.h,fill:{color:rc(el.fill,dk)}};if(el.transparency)opts.fill.transparency=el.transparency;if(el.border){opts.line={color:rc(el.border,dk),width:el.bw||1};opts.shadow={type:'outer',blur:4,offset:1,angle:135,color:'000000',opacity:0.08};}sl.addShape(pptx.shapes.RECTANGLE,opts);}
