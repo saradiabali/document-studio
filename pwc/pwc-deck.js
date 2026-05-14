@@ -77,6 +77,11 @@ else if(el.type==='tbl'){if(el._agendaTable){h+='<div style="position:absolute;l
 else if(el.type==='cover-logo'){
 h+='<img src="'+COVER_LOGO+'" style="position:absolute;left:'+px(0.40)+'px;top:'+px(0.40)+'px;width:'+px(1.35)+'px;height:'+px(0.66)+'px;object-fit:contain;">';
 }
+else if(el.type==='footer'){
+var deckTitle=document.getElementById('deckTitle')?document.getElementById('deckTitle').innerText:'';
+h+='<div style="position:absolute;left:29px;bottom:14px;font-size:9px;color:#595959;font-family:Arial,sans-serif;">'+esc(deckTitle)+'</div>';
+h+='<div style="position:absolute;right:20px;bottom:14px;font-size:9px;color:#1A1A1A;font-family:Arial,sans-serif;font-weight:700;">PwC</div>';
+}
 else if(el.type==='cover-bg'){
 h+='<div style="position:absolute;left:0;top:0;width:100%;height:100%;background:linear-gradient(to top right,#FFFFFF,#FEAF8F);"></div>';
 h+='<div style="position:absolute;left:'+px(4.67)+'px;top:'+px(4.63)+'px;width:'+px(0.86)+'px;height:'+px(4.11)+'px;background:#FA510A;transform:skewX(-12deg);"></div>';
@@ -105,6 +110,7 @@ else if(el.type==='tbl'){if(el._agendaTable){var aRows=[];(el.rows||[]).forEach(
 else if(el.type==='cover-logo'){
 sl.addImage({data:COVER_LOGO,x:0.40,y:0.40,w:1.35,h:0.66});
 }
+else if(el.type==='footer'){continue;}
 else if(el.type==='img'){var container=document.getElementById(el.ref);var genImg=findImg(container);if(genImg){try{var imgData=await captureImage(genImg,el.w,el.h);if(imgData){sl.addImage({data:imgData,x:el.x,y:el.y,w:el.w,h:el.h});}}catch(e){}}}
 }}
 async function dlP(){var btn=document.getElementById('dlBtn'),st=document.getElementById('st');btn.disabled=true;btn.textContent='Compiling...';try{if(typeof PptxGenJS==='undefined'){st.textContent='Error: PptxGenJS not loaded.';btn.disabled=false;btn.textContent='\u2B07 DOWNLOAD PPTX';return;}var allFrames=document.querySelectorAll('.sf');allFrames.forEach(function(f){f.style.display='block';});st.textContent='Preparing...';await new Promise(function(r){setTimeout(r,1000);});
