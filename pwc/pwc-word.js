@@ -58,7 +58,7 @@ case 'cols':if(el.items&&el.items.length>0){var cells=el.items.map(function(col)
 case 'div':ch.push(pa([tr(' ')],{bo:{bottom:{style:docx.BorderStyle.SINGLE,size:2,color:C.ltGray}},be:120,a:120,ln:240}));break;
 case 'pb':ch.push(pa([tr(' ')],{pb:true,a:0,ln:240}));break;
 }});
-var hdrCh=[new docx.Paragraph({children:[mkImg(wData,90,28,'PwC')],spacing:{after:0,line:240}}),new docx.Paragraph({children:[],border:{bottom:{style:docx.BorderStyle.SINGLE,size:4,color:ac,space:12}},spacing:{after:120,line:240}})];
+var hdrCh=[new docx.Paragraph({children:[mkImg(wData,57,28,'PwC')],spacing:{after:0,line:240}}),new docx.Paragraph({children:[],border:{bottom:{style:docx.BorderStyle.SINGLE,size:4,color:ac,space:12}},spacing:{after:120,line:240}})];
 var ftrCh=[new docx.Paragraph({children:[],border:{top:{style:docx.BorderStyle.SINGLE,size:4,color:ac,space:12}},spacing:{before:120,after:0,line:240}})];
 var fr=[mkImg(iData,18,18,'PwC'),new docx.TextRun({children:["\t"],font:DF.body,size:14}),new docx.TextRun({children:[docx.PageNumber.CURRENT],font:DF.body,size:16,color:C.gray})];
 ftrCh.push(new docx.Paragraph({children:fr,spacing:{line:240},tabStops:[{type:docx.TabStopType.RIGHT,position:9840}]}));
