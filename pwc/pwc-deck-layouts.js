@@ -98,22 +98,25 @@ function layoutClosing(s){
 // Big orange number top-right (350pt), title bottom-left (48pt Georgia serif)
 // Measured from official PwC divider template
 function layoutDivider(s){
-  var els=[];
-  var cream = !s.style || s.style !== 'white';
-  // Background — cream or white
-  if(cream) els.push({type:'s',x:0,y:0,w:13.33,h:7.5,fill:'FFE8D4'});
-  // Big orange section number — top-right, 350pt
-  // Position: x=8.961 y=0.626 w=3.786 h=4.712 (from template)
-  var num = String(s.number || s.num || '1');
-  els.push({type:'t',text:num,x:8.961,y:0.626,w:3.786,h:4.712,font:'H',size:350,color:'accent',valign:'top'});
-  // Title — bottom-left, large serif, 48pt
-  // Position: x=0.406 y=3.784 w=6.174 h=2.836 (from template)
-  var title = s.title || '';
-  els.push({type:'t',text:title,x:0.406,y:3.784,w:6.174,h:2.836,font:'H',size:48,color:'title',valign:'bottom'});
-  s.num = '';
-  return els;
-}
+var els=[];
+var cream = !s.style || s.style !== 'white';
+if(cream) els.push({type:'s',x:0,y:0,w:13.33,h:7.5,fill:'FFE8D4'});
 
+// Big number — Arial, 350pt, color FD5108, right-aligned
+// Position: x=22.76cm=8.96", y=1.6cm=0.63"
+var num = String(s.number || '1');
+els.push({type:'t',text:num,x:8.96,y:0.63,w:3.8,h:4.5,font:'B',size:350,color:'FD5108',valign:'top'});
+
+// Title — bottom-left, large serif, 48pt
+var title = s.title || '';
+els.push({type:'t',text:title,x:0.406,y:3.784,w:6.174,h:2.836,font:'H',size:48,color:'title',valign:'bottom'});
+
+// Footer elements (same as content slides)
+els.push({type:'footer'});
+
+s.num = '';
+return els;
+}
 // ═══ PwC AGENDA — matches template exactly
 // Large "Agenda" title bottom-left (48pt Georgia)
 // Numbered list right side: orange number (28pt bold) + item text (28pt)
