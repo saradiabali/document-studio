@@ -100,8 +100,8 @@ h+='<div style="position:absolute;left:0;top:0;width:100%;height:100%;background
 }
 else if(el.type==='cover-bg'){
 h+='<div style="position:absolute;left:0;top:0;width:100%;height:100%;background:linear-gradient(to top right,#FFFFFF,#FEAF8F);"></div>';
-h+='<div style="position:absolute;left:'+px(4.665)+'px;top:'+px(4.625)+'px;width:'+px(4.106)+'px;height:'+px(0.858)+'px;background:#FA510A;transform:skewX(-12deg);"></div>';
-h+='<div style="position:absolute;left:'+px(8.774)+'px;top:'+px(3.750)+'px;width:'+px(4.107)+'px;height:'+px(0.857)+'px;background:#FA510A;transform:skewX(-12deg);"></div>';
+h+='<div style="position:absolute;left:'+px(4.665)+'px;top:'+px(4.625)+'px;width:'+px(4.106)+'px;height:'+px(0.858)+'px;background:#FA510A;transform:skewX(-30deg);"></div>';
+h+='<div style="position:absolute;left:'+px(8.774)+'px;top:'+px(3.750)+'px;width:'+px(4.107)+'px;height:'+px(0.857)+'px;background:#FA510A;transform:skewX(-30deg);"></div>';
 }});
 var isCoverSlide=(s.layout==='title'||s.layout==='closing');
 if(!isCoverSlide){
