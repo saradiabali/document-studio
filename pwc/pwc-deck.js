@@ -47,9 +47,8 @@ var noVml=(typeof NO_VML!=='undefined'&&NO_VML);
 D.forEach(function(s,i){
 var dk=s.dark;var numColor=dk?'#F5F5F5':'#191919';
 h+='<div class="sf '+(dk?'dk':'lt')+'" style="display:'+(i===0?'block':'none')+';">';
-h+='<div class="ab" style="background:#'+C.accent+';"></div>';
-h+='<div class="sn" style="color:'+numColor+';font-weight:600;">'+(s.num||'')+'</div>';
-// PwC: no icon element
+h+='<div class="sn" style="position:absolute;right:20px;bottom:30px;font-size:10px;color:#'+C.accent+';font-weight:600;">'+(s.num||'')+'</div>';
+  // PwC: no icon element
 s.els.forEach(function(el){
 if(el.type==='t'){var vs=el.valign==='middle'?'display:flex;align-items:center;':el.valign==='bottom'?'display:flex;align-items:flex-end;':'';h+='<div style="position:absolute;left:'+px(el.x)+'px;top:'+px(el.y)+'px;width:'+px(el.w)+'px;'+(el.h?'height:'+px(el.h)+'px;':'')+vs+'font-size:'+el.size+'px;color:#'+rc(el.color,dk)+';font-weight:'+(el.font==='H'?'500':'400')+';line-height:1.4;">'+esc(el.text)+'</div>';}
 else if(el.type==='s'){var bdr=el.border?'border:'+(el.bw||1)+'px solid #'+rc(el.border,dk)+';':'';h+='<div style="position:absolute;left:'+px(el.x)+'px;top:'+px(el.y)+'px;width:'+px(el.w)+'px;height:'+px(el.h)+'px;background:#'+rc(el.fill,dk)+';'+(el.transparency?'opacity:'+(1-el.transparency/100)+';':'')+bdr+'"></div>';}
@@ -73,17 +72,16 @@ function placeImages(){D.forEach(function(s,i){s.els.forEach(function(el){if(el.
 function aL(sl,dk,pptx){var noVml=(typeof NO_VML!=='undefined'&&NO_VML);var cl=dk?CL_WHITE:CL_BLACK;if(!cl)return;var VML_W_IN=0.68,VML_H_IN=0.21,DOT_SIZE=0.04,CLIENT_H_IN=CLIENT_H_PX/80,CLIENT_W_IN=CLIENT_H_IN*CLIENT_AR;if(!noVml){var dotX=.29+VML_W_IN+0.08,dotY=7.0+(VML_H_IN-DOT_SIZE)/2;sl.addShape(pptx.shapes.RECTANGLE,{x:dotX,y:dotY,w:DOT_SIZE,h:DOT_SIZE,fill:{color:C.gray}});var clX=dotX+DOT_SIZE+0.08,clY=7.0+(VML_H_IN-CLIENT_H_IN)/2;sl.addImage({data:cl,x:clX,y:clY,w:CLIENT_W_IN,h:CLIENT_H_IN});}else{sl.addImage({data:cl,x:.29,y:7.0+(0.21-CLIENT_H_IN)/2,w:CLIENT_W_IN,h:CLIENT_H_IN});}}
 function ms(pptx,s){
 var dk=s.dark;
-var isCover=(s.layout==='title'||s.layout==='closing');
+var isCover=(s.layout==='title'||s.layout==='closing'||s.layout==='divider'||s.layout==='agenda');
 var sl;
-if(isCover){
+if(isCover&&typeof COVER_BG!=='undefined'){
   sl=pptx.addSlide({masterName:'PwC_LIGHT'});
-  // Override background with gradient image
   sl.background={data:COVER_BG};
 } else {
   sl=pptx.addSlide({masterName:'PwC_LIGHT'});
 }
 aL(sl,dk,pptx);
-if(s.num)sl.addText(s.num,{x:12.3,y:.31,w:.75,h:.2,fontSize:10,fontFace:FONT.head,color:C.accent,align:'right',bold:true,autoFit:true});
+if(s.num)sl.addText(s.num,{x:11.5,y:6.9,w:1,h:.3,fontSize:10,fontFace:FONT.body,color:C.accent,align:'right',bold:true});
 return sl;
 }
 async function bs(pptx,s,slideIdx){var sl=ms(pptx,s),dk=s.dark;if(!s.els)return;
@@ -104,9 +102,9 @@ var pptx=new PptxGenJS();pptx.layout='LAYOUT_WIDE';pptx.title=document.getElemen
 if(typeof resolveLayouts==='function')resolveLayouts();
 var noVml=(typeof NO_VML!=='undefined'&&NO_VML);
 var dkObjs=[{rect:{x:.29,y:.55,w:12.75,h:.02,fill:{color:C.accent}}},{text:{text:'PwC',options:{x:8,y:7.0,w:5,h:.25,fontSize:7,fontFace:FONT.body,color:C.gray,align:'right'}}}];
-var ltObjs=[{rect:{x:.29,y:.55,w:12.75,h:.02,fill:{color:C.accent}}},{text:{text:'PwC',options:{x:8,y:7.0,w:5,h:.25,fontSize:7,fontFace:FONT.body,color:C.mdGray,align:'right'}}}];
+var ltObjs=[{text:{text:'PwC',options:{x:11,y:7.0,w:2,h:.25,fontSize:9,fontFace:FONT.body,color:'595959',align:'right',bold:true}}}];
 if(!noVml){if(L.wW)dkObjs.push({image:{data:L.wW,x:.29,y:7.0,w:.68,h:.21,sizing:{type:'contain',w:.68,h:.21}}});if(L.bW)ltObjs.push({image:{data:L.bW,x:.29,y:7.0,w:.68,h:.21,sizing:{type:'contain',w:.68,h:.21}}});}
-pptx.defineSlideMaster({title:'PwC_DARK',background:{color:'1A1A1A'},objects:dkObjs});pptx.defineSlideMaster({title:'PwC_LIGHT',background:{color:'FFFFFF'},objects:ltObjs});
+pptx.defineSlideMaster({title:'PwC_LIGHT',background:{color:'FFFFFF'},objects:ltObjs});
 for(var i=0;i<D.length;i++){st.textContent='Compiling slide '+(i+1)+' of '+D.length+'...';await new Promise(function(r){requestAnimationFrame(r);});await bs(pptx,D[i],i);}st.textContent='Packaging...';await new Promise(function(r){requestAnimationFrame(r);});var t=document.getElementById('deckTitle').innerText.replace(/[^a-zA-Z0-9]/g,'_');await pptx.writeFile({fileName:'PwC_'+t+'_'+D.length+'slides.pptx'});allFrames.forEach(function(f,idx){f.style.display=idx===cur?'block':'none';});st.textContent='\u2705 Download complete!';}catch(e){st.textContent='Error: '+e.message;var af=document.querySelectorAll('.sf');af.forEach(function(f,idx){f.style.display=idx===cur?'block':'none';});}btn.disabled=false;btn.textContent='\u2B07 DOWNLOAD PPTX';}
 var cur=0;
 function show(i){var f=document.querySelectorAll('.sf');if(i<0||i>=f.length)return;f[cur].style.display='none';cur=i;f[cur].style.display='block';document.getElementById('nc').textContent=(cur+1)+' / '+D.length;document.getElementById('hc').textContent='SLIDE '+(cur+1)+' OF '+D.length;}
