@@ -124,29 +124,33 @@ function layoutDivider(s){
 // Measured from official PwC agenda template
 // items: array of strings (up to 8)
 function layoutAgenda(s){
-  var els=[];
-  var cream = s.style === 'cream';
-  // Background
-  if(cream) els.push({type:'s',x:0,y:0,w:13.33,h:7.5,fill:'FFE8D4'});
-  // "Agenda" title — bottom-left, large serif
-  // Position: x=0.429 y=2.952 w=4.574 h=2.726 (from template)
-  els.push({type:'t',text:s.title||'Agenda',x:0.429,y:2.952,w:4.574,h:2.726,font:'H',size:48,color:'title',valign:'bottom'});
-  // Numbered list — right side
-  // Container: x=5.674 y=0.845 w=7.257 h=3.640 (from template)
-  // Each item: number in orange (28pt), text in black (28pt)
-  var items = s.items || [];
-  var listX = 5.674, listY = 0.845, listW = 7.257, listH = 3.640;
-  var rowH = Math.min(listH / Math.max(items.length, 1), 0.65);
-  var numW = 0.5, gap = 0.2, textW = listW - numW - gap;
-  items.forEach(function(item, i){
-    var ry = listY + i * rowH;
-    // Number in orange
-    els.push({type:'t',text:String(i+1),x:listX,y:ry,w:numW,h:rowH,font:'H',size:28,color:'accent',valign:'middle'});
-    // Item text in black
-    els.push({type:'t',text:item,x:listX+numW+gap,y:ry,w:textW,h:rowH,font:'B',size:28,color:'title',valign:'middle'});
-  });
-  s.num = '';
-  return els;
+var els=[];
+var cream = s.style === 'cream';
+if(cream) els.push({type:'s',x:0,y:0,w:13.33,h:7.5,fill:'FFE8D4'});
+
+// "Agenda" title — bottom-left, large serif
+els.push({type:'t',text:s.title||'Agenda',x:0.429,y:2.952,w:4.574,h:2.726,font:'H',size:48,color:'title',valign:'bottom'});
+
+// Agenda table — right side
+var items = s.items || [];
+var tblX = 5.674, tblY = 0.845, tblW = 7.257;
+var rowH = Math.min(3.640 / Math.max(items.length, 1), 0.65);
+var rows = items.map(function(item, i) {
+  return [String(i + 1), item];
+});
+
+els.push({
+  type: 'tbl',
+  x: tblX,
+  y: tblY,
+  w: tblW,
+  h: rows.length * rowH,
+  rows: rows,
+  _agendaTable: true
+});
+
+s.num = '';
+return els;
 }
 
 // ═══ PwC CARDS — clean white cards, serif titles, orange accent ═══
@@ -155,8 +159,8 @@ function layoutCards(s){
   var cols=s.columns||Math.min(items.length,4);
   var grid=GRIDS[cols]||GRIDS[3];
 
-  if(s.tag) els.push({type:'t',text:s.tag.toUpperCase(),x:.5,y:.6,w:11,h:.25,font:'B',size:10,color:'accent'});
-  els.push({type:'t',text:s.title||'',x:.5,y:.85,w:11,h:.55,font:'H',size:34,color:'title'});
+  if(s.tag) els.push({type:'t',text:s.tag.toUpperCase(),x:.5,y:.5,w:11,h:.25,font:'B',size:10,color:'accent'});
+  els.push({type:'t',text:s.title||'',x:.5,y:.75,w:11,h:.55,font:'H',size:34,color:'title'});
   if(s.subtitle) els.push({type:'t',text:s.subtitle,x:.5,y:1.5,w:10,h:.3,font:'B',size:12,color:'body'});
 
   var nRows=Math.ceil(items.length/cols);var gap=0.2;
@@ -207,8 +211,8 @@ function layoutStats(s){
   var cols=s.columns||2;var nRows=s.rows||Math.ceil(items.length/cols);
   var grid=GRIDS[cols]||GRIDS[2];
 
-  if(s.tag) els.push({type:'t',text:s.tag.toUpperCase(),x:.5,y:.6,w:11,h:.25,font:'B',size:10,color:'accent'});
-  els.push({type:'t',text:s.title||'',x:.5,y:.85,w:11,h:.55,font:'H',size:34,color:'title'});
+  if(s.tag) els.push({type:'t',text:s.tag.toUpperCase(),x:.5,y:.5,w:11,h:.25,font:'B',size:10,color:'accent'});
+  els.push({type:'t',text:s.title||'',x:.5,y:.75,w:11,h:.55,font:'H',size:34,color:'title'});
   if(s.subtitle) els.push({type:'t',text:s.subtitle,x:.5,y:1.5,w:10,h:.3,font:'B',size:12,color:'body'});
 
   var gap=0.2;var totalH=6.2-2.1;
@@ -246,8 +250,8 @@ function layoutStats(s){
 // ═══ PwC SPLIT ═══
 function layoutSplit(s){
   var els=[];var items=s.items||[];
-  if(s.tag) els.push({type:'t',text:s.tag.toUpperCase(),x:.5,y:.6,w:11,h:.25,font:'B',size:10,color:'accent'});
-  els.push({type:'t',text:s.title||'',x:.5,y:.85,w:11,h:.55,font:'H',size:34,color:'title'});
+  if(s.tag) els.push({type:'t',text:s.tag.toUpperCase(),x:.5,y:.5,w:11,h:.25,font:'B',size:10,color:'accent'});
+  els.push({type:'t',text:s.title||'',x:.5,y:.75,w:11,h:.55,font:'H',size:34,color:'title'});
   if(s.subtitle) els.push({type:'t',text:s.subtitle,x:.5,y:1.5,w:10,h:.3,font:'B',size:12,color:'body'});
 
   var positions=[{x:.5,w:5.9},{x:6.9,w:5.9}];
@@ -264,8 +268,8 @@ function layoutSplit(s){
 // ═══ PwC ROWS ═══
 function layoutRows(s){
   var els=[];var items=s.items||[];var numbered=s.numbered!==false;
-  if(s.tag) els.push({type:'t',text:s.tag.toUpperCase(),x:.5,y:.6,w:11,h:.25,font:'B',size:10,color:'accent'});
-  els.push({type:'t',text:s.title||'',x:.5,y:.85,w:11,h:.55,font:'H',size:34,color:'title'});
+  if(s.tag) els.push({type:'t',text:s.tag.toUpperCase(),x:.5,y:.5,w:11,h:.25,font:'B',size:10,color:'accent'});
+  els.push({type:'t',text:s.title||'',x:.5,y:.75,w:11,h:.55,font:'H',size:34,color:'title'});
   if(s.subtitle) els.push({type:'t',text:s.subtitle,x:.5,y:1.5,w:10,h:.3,font:'B',size:12,color:'body'});
 
   var startY=2.1;var totalH=6.1-startY;var gap=0.1;
@@ -291,8 +295,8 @@ function layoutRows(s){
 // ═══ PwC DETAIL ═══
 function layoutDetail(s){
   var els=[];var items=s.items||[];
-  if(s.tag) els.push({type:'t',text:s.tag.toUpperCase(),x:.5,y:.6,w:11,h:.25,font:'B',size:10,color:'accent'});
-  els.push({type:'t',text:s.title||'',x:.5,y:.85,w:11,h:.55,font:'H',size:34,color:'title'});
+  if(s.tag) els.push({type:'t',text:s.tag.toUpperCase(),x:.5,y:.5,w:11,h:.25,font:'B',size:10,color:'accent'});
+  els.push({type:'t',text:s.title||'',x:.5,y:.75,w:11,h:.55,font:'H',size:34,color:'title'});
   if(s.subtitle) els.push({type:'t',text:s.subtitle,x:.5,y:1.5,w:10,h:.3,font:'B',size:12,color:'body'});
 
   var cardX=2.5,cardW=8.3;var itemH=0.7,pad=0.25;
@@ -314,8 +318,8 @@ function layoutDetail(s){
 // ═══ PwC BULLETS ═══
 function layoutBullets(s){
   var els=[];var items=s.items||[];
-  if(s.tag) els.push({type:'t',text:s.tag.toUpperCase(),x:.5,y:.6,w:11,h:.25,font:'B',size:10,color:'accent'});
-  els.push({type:'t',text:s.title||'',x:.5,y:.85,w:11,h:.55,font:'H',size:34,color:'title'});
+  if(s.tag) els.push({type:'t',text:s.tag.toUpperCase(),x:.5,y:.5,w:11,h:.25,font:'B',size:10,color:'accent'});
+  els.push({type:'t',text:s.title||'',x:.5,y:.75,w:11,h:.55,font:'H',size:34,color:'title'});
   if(s.subtitle) els.push({type:'t',text:s.subtitle,x:.5,y:1.5,w:10,h:.3,font:'B',size:12,color:'body'});
   var bulletText=items.map(function(item){return '\u2014  '+item;}).join('\n');
   els.push({type:'t',text:bulletText,x:.5,y:2.1,w:9.8,h:4.2,font:'B',size:12,color:'body'});
