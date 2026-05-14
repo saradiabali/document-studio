@@ -17,6 +17,7 @@ function resolveLayouts(){
       if(s.layout==='title'){s.dark=0;s.num='';}
       if(s.layout==='closing'){s.dark=0;s.num='';}
       if(s.layout==='divider'){s.dark=0;s.num='';}
+      if(s.layout==='agenda'){s.dark=0;s.num='';}
       if(s.dark===undefined)s.dark=0;
       s.els=buildLayout(s);
       s._resolved=true;
@@ -29,6 +30,7 @@ function buildLayout(s){
     case 'title':   return layoutTitle(s);
     case 'closing': return layoutClosing(s);
     case 'divider': return layoutDivider(s);
+    case 'agenda':  return layoutAgenda(s);
     case 'cards':   return layoutCards(s);
     case 'stats':   return layoutStats(s);
     case 'split':   return layoutSplit(s);
@@ -43,8 +45,10 @@ function buildLayout(s){
 // Matches template "Title Slide" — cream/blush gradient feel
 function layoutTitle(s){
   var els=[];
-  // Cream background signal (engine uses this to set cream bg in HTML preview)
-  els.push({type:'s',x:0,y:0,w:13.33,h:7.5,fill:'cream'});
+  // Cover background: use the real branded PNG in both HTML preview and PPTX
+  // Engine ms() applies L.coverBg via sl.background for PPTX
+  // HTML preview: we inject a full-bleed img via the 'cover-bg' type
+  els.push({type:'cover-bg'});
   // Orange accent bar — left side vertical
   els.push({type:'b',x:0,y:0,w:0.07,h:7.5,fill:'accent'});
 
@@ -74,7 +78,7 @@ function layoutTitle(s){
 // ═══ PwC CLOSING — cream background, thank you, contact info ═══
 function layoutClosing(s){
   var els=[];
-  els.push({type:'s',x:0,y:0,w:13.33,h:7.5,fill:'cream'});
+  els.push({type:'cover-bg'});
   els.push({type:'b',x:0,y:0,w:0.07,h:7.5,fill:'accent'});
 
   var tH=(s.title&&s.title.length>40)?1.4:0.85;
@@ -92,24 +96,56 @@ function layoutClosing(s){
   return els;
 }
 
-// ═══ PwC DIVIDER — cream bg, large orange section number top-right, title bottom-left ═══
-// Matches template "Section Header" — cream background, big number, title
+// ═══ PwC DIVIDER — matches template exactly
+// Two variants: cream bg (default) or white bg via style:'white'
+// Big orange number top-right (350pt), title bottom-left (48pt Georgia serif)
+// Measured from official PwC divider template
 function layoutDivider(s){
   var els=[];
-  els.push({type:'s',x:0,y:0,w:13.33,h:7.5,fill:'cream'});
-  // Large section number top-right in orange
-  var num=s.number||s.num||'1';
-  els.push({type:'t',text:num,x:8,y:.3,w:5,h:4.5,font:'H',size:160,color:'accent',valign:'top'});
-  // Section label
-  if(s.tag){
-    els.push({type:'t',text:s.tag.toUpperCase(),x:.6,y:3.8,w:7,h:.3,font:'B',size:10,color:'accent'});
-  }
-  // Title bottom-left in large serif
-  var title=s.title||'';
-  var tH=title.length>30?1.4:0.9;
-  var titleY=6.8-tH-0.1;
-  els.push({type:'t',text:title,x:.6,y:titleY,w:7.5,h:tH,font:'H',size:44,color:'title',valign:'bottom'});
-  s.num='';
+  var cream = !s.style || s.style !== 'white';
+  // Background — cream or white
+  if(cream) els.push({type:'s',x:0,y:0,w:13.33,h:7.5,fill:'FFE8D4'});
+  // Big orange section number — top-right, 350pt
+  // Position: x=8.961 y=0.626 w=3.786 h=4.712 (from template)
+  var num = String(s.number || s.num || '1');
+  els.push({type:'t',text:num,x:8.961,y:0.626,w:3.786,h:4.712,font:'H',size:350,color:'accent',valign:'top'});
+  // Title — bottom-left, large serif, 48pt
+  // Position: x=0.406 y=3.784 w=6.174 h=2.836 (from template)
+  var title = s.title || '';
+  els.push({type:'t',text:title,x:0.406,y:3.784,w:6.174,h:2.836,font:'H',size:48,color:'title',valign:'bottom'});
+  s.num = '';
+  return els;
+}
+
+// ═══ PwC AGENDA — matches template exactly
+// Large "Agenda" title bottom-left (48pt Georgia)
+// Numbered list right side: orange number (28pt bold) + item text (28pt)
+// Two variants: white bg (default) or cream bg via style:'cream'
+// Measured from official PwC agenda template
+// items: array of strings (up to 8)
+function layoutAgenda(s){
+  var els=[];
+  var cream = s.style === 'cream';
+  // Background
+  if(cream) els.push({type:'s',x:0,y:0,w:13.33,h:7.5,fill:'FFE8D4'});
+  // "Agenda" title — bottom-left, large serif
+  // Position: x=0.429 y=2.952 w=4.574 h=2.726 (from template)
+  els.push({type:'t',text:s.title||'Agenda',x:0.429,y:2.952,w:4.574,h:2.726,font:'H',size:48,color:'title',valign:'bottom'});
+  // Numbered list — right side
+  // Container: x=5.674 y=0.845 w=7.257 h=3.640 (from template)
+  // Each item: number in orange (28pt), text in black (28pt)
+  var items = s.items || [];
+  var listX = 5.674, listY = 0.845, listW = 7.257, listH = 3.640;
+  var rowH = Math.min(listH / Math.max(items.length, 1), 0.65);
+  var numW = 0.5, gap = 0.2, textW = listW - numW - gap;
+  items.forEach(function(item, i){
+    var ry = listY + i * rowH;
+    // Number in orange
+    els.push({type:'t',text:String(i+1),x:listX,y:ry,w:numW,h:rowH,font:'H',size:28,color:'accent',valign:'middle'});
+    // Item text in black
+    els.push({type:'t',text:item,x:listX+numW+gap,y:ry,w:textW,h:rowH,font:'B',size:28,color:'title',valign:'middle'});
+  });
+  s.num = '';
   return els;
 }
 
