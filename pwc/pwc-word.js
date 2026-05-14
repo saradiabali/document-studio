@@ -11,13 +11,39 @@ function rl(p,w,h,f){try{var c=document.createElement('canvas');c.width=w*2;c.he
 // PwC wordmark — pre-rendered from official SVG
 var VP={w:{vB:'0 0 100 100',p:['M66.7 47.3001C64.2 47.7001 63 49.5001 63 52.7001C63 55.9001 64.7 58.1001 67.2 58.1001C69.7 58.1001 69.5 57.7001 71.8 56.6001V59.2001C69.1 60.5001 67.5 60.8001 65.2 60.8001C62.9 60.8001 61.1 60.2001 59.8 58.8001C58.4 57.4001 57.7 55.5001 57.7 53.5001C57.7 48.9001 61.1 45.8001 66.1 45.8001C71.1 45.8001 71.7 47.3001 71.7 49.5001C71.7 51.7001 70.6 51.9001 69.1 51.9001C67.6 51.9001 67.6 51.7001 66.8 51.2001V47.3001H66.7ZM54.6 53.4001C56.8 50.6001 57.6 49.5001 57.6 48.1001C57.6 46.7001 56.5 45.6001 55.1 45.6001C53.7 45.6001 53.4 46.0001 53 46.5001V52.2001L49.4 57.0001V46.0001H46L40.3 55.5001V46.0001H38.3L33.1 47.3001V48.6001L35.9 48.9001V60.5001H39.6L45.1 51.5001V60.5001H49.1L54.7 53.4001H54.6ZM22.2 49.0001C23 49.0001 23.5 48.8001 23.9 48.8001C26.3 48.8001 27.6 50.4001 27.6 53.4001C27.6 56.4001 26 58.8001 23.1 58.8001C20.2 58.8001 22.7 58.8001 22.3 58.8001V49.1001L22.2 49.0001ZM22.2 60.4001C23.1 60.4001 24.1 60.4001 24.6 60.4001C29.5 60.4001 32.6 57.3001 32.6 52.6001C32.6 47.9001 30.3 45.7001 27.1 45.7001C23.9 45.7001 24.8 46.0001 22.2 47.6001V45.7001H20.7L15 47.4001V48.8001H17.4V65.0001L15.3 65.5001V66.8001H24.6V65.5001L22.2 65.0001V60.3001V60.4001Z','M64.1 41.8H48.6L51.2 37.4H66.7L64.1 41.8ZM84.9 33H69.4L66.8 37.4H82.3L84.9 33Z']}};
 var L={bW:rl(VP.w,150,52,'#1A1A1A'),bI:null};
+var DOC_LOGO=(function(){
+var vb=VP.w.vB.split(/[\s,]+/).map(Number);
+var tw=600,th=600;
+var c=document.createElement('canvas');
+c.width=tw;c.height=th;
+var ctx=c.getContext('2d');
+var s=Math.min(tw/vb[2],th/vb[3]);
+ctx.translate((tw-vb[2]*s)/2,(th-vb[3]*s)/2);
+ctx.scale(s,s);
+ctx.fillStyle='#1A1A1A';
+ctx.fill(new Path2D(VP.w.p[0]));
+ctx.fillStyle='#FD5108';
+ctx.fill(new Path2D(VP.w.p[1]));
+var data=ctx.getImageData(0,0,tw,th).data;
+var top=th,left=tw,bot=0,right=0;
+for(var y=0;y<th;y++)for(var x=0;x<tw;x++){
+if(data[(y*tw+x)*4+3]>10){if(x<left)left=x;if(x>right)right=x;if(y<top)top=y;if(y>bot)bot=y;}}
+var pad=4;
+left=Math.max(0,left-pad);top=Math.max(0,top-pad);
+right=Math.min(tw-1,right+pad);bot=Math.min(th-1,bot+pad);
+var cw=right-left+1,ch=bot-top+1;
+var cr=document.createElement('canvas');
+cr.width=cw;cr.height=ch;
+cr.getContext('2d').drawImage(c,left,top,cw,ch,0,0,cw,ch);
+return cr.toDataURL('image/png');
+})();
 function d2u(d){if(!d)return null;var b=atob(d.split(',')[1]),a=new Uint8Array(b.length);for(var i=0;i<b.length;i++)a[i]=b.charCodeAt(i);return a;}
 function esc(s){if(!s)return '';var d=document.createElement('div');d.textContent=s;return d.innerHTML.replace(/\n/g,'<br>');}
 function rc(k){return C[k]||k;}
 function mkImg(data,w,h,fb){if(data){try{return new docx.ImageRun({data:data,transformation:{width:w,height:h}});}catch(e){}}return new docx.TextRun({text:fb||'PwC',font:DF.head,size:18,bold:true,color:C.gray});}
 
 function renderDoc(){var w=document.getElementById('docContent'),h='',ac=C.accent;
-h+='<div class="doc-hdr">';if(L.bW)h+='<img src="'+L.bW+'" class="hdr-logo">';else h+='<div class="hdr-logo-txt">PwC</div>';h+='<div class="hdr-ln" style="background:#'+ac+';"></div></div>';
+h+='<div class="doc-hdr">';if(DOC_LOGO)h+='<img src="'+DOC_LOGO+'" class="hdr-logo">';else h+='<div class="hdr-logo-txt">PwC</div>';h+='<div class="hdr-ln" style="background:#'+ac+';"></div></div>';
 D.forEach(function(el){switch(el.type){
 case 'cover':h+='<div class="doc-cover">';if(el.tag)h+='<div class="cv-tag" style="color:#'+ac+';">'+esc(el.tag.toUpperCase())+'</div>';h+='<div class="cv-line" style="border-color:#'+ac+';"></div><div class="cv-title">'+esc(el.title)+'</div>';if(el.subtitle)h+='<div class="cv-sub">'+esc(el.subtitle)+'</div>';var m='';if(el.date)m+=esc(el.date);if(el.date&&el.author)m+=' · ';if(el.author)m+=esc(el.author);if(m)h+='<div class="cv-meta">'+m+'</div>';h+='</div>';break;
 case 'toc':h+='<div class="doc-pb"></div><div class="doc-toc"><div class="toc-hd">Table of Contents</div><div class="toc-bar" style="background:#'+ac+';"></div>';var tn=0;D.forEach(function(it){if(it.type==='h'&&it.level<=2){tn++;h+='<div class="toc-item'+(it.level===2?' toc-sub':'')+'">'+(it.level===1?'<span class="toc-n" style="color:#'+ac+';">'+tn+'</span>':'')+esc(it.text)+'</div>';}});h+='</div><div class="doc-pb"></div>';break;
@@ -36,7 +62,7 @@ case 'pb':h+='<div class="doc-pb"></div>';break;
 }});
 h+='<div class="doc-ftr"><div class="ftr-ln" style="background:#'+ac+';"></div><div class="ftr-in">';if(L.bI)h+='<img src="'+L.bI+'" class="ftr-ico">';else h+='<span class="ftr-ico-txt">\u2726</span>';h+='<span class="ftr-pg">1</span></div></div>';w.innerHTML=h;}
 
-async function buildDocx(){var ch=[],dt='Document',ac=C.accent,wData=d2u(L.bW),iData=d2u(L.bI);
+async function buildDocx(){var ch=[],dt='Document',ac=C.accent,wData=d2u(DOC_LOGO),iData=d2u(L.bI);
 function tr(t,o){o=o||{};var r={text:t||'',font:o.f||DF.body,size:(o.s||11)*2,color:o.c||C.dkGray};if(o.b)r.bold=true;if(o.i)r.italics=true;return new docx.TextRun(r);}
 function pa(runs,o){o=o||{};var sp={after:o.a!==undefined?o.a:200,before:o.be||0};sp.line=o.ln!==undefined?o.ln:360;var p={children:Array.isArray(runs)?runs:[runs],spacing:sp};if(o.hd)p.heading=o.hd;if(o.al)p.alignment=o.al;if(o.ind)p.indent=o.ind;if(o.bu)p.bullet=o.bu;if(o.bo)p.border=o.bo;if(o.sh)p.shading=o.sh;if(o.pb)p.pageBreakBefore=true;if(o.kn)p.keepNext=true;return new docx.Paragraph(p);}
 function wrapCell(ch2,opts){opts=opts||{};var co={children:ch2,borders:{top:{style:docx.BorderStyle.NONE},bottom:{style:docx.BorderStyle.NONE},right:{style:docx.BorderStyle.NONE},left:opts.leftBorder||{style:docx.BorderStyle.NONE}},margins:opts.margins||{top:200,bottom:200,left:240,right:120}};if(opts.shading)co.shading=opts.shading;return new docx.Table({rows:[new docx.TableRow({children:[new docx.TableCell(co)]})],width:{size:100,type:docx.WidthType.PERCENTAGE},borders:{top:{style:docx.BorderStyle.NONE},bottom:{style:docx.BorderStyle.NONE},left:{style:docx.BorderStyle.NONE},right:{style:docx.BorderStyle.NONE},insideHorizontal:{style:docx.BorderStyle.NONE},insideVertical:{style:docx.BorderStyle.NONE}}});}
