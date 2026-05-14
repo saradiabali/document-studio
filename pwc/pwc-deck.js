@@ -90,16 +90,28 @@ h+='<div style="position:absolute;left:0;top:0;width:100%;height:100%;background
 h+='<div style="position:absolute;left:'+px(4.665)+'px;top:'+px(4.625)+'px;width:'+px(4.106)+'px;height:'+px(0.858)+'px;background:#FA510A;transform:skewX(-12deg);"></div>';
 h+='<div style="position:absolute;left:'+px(8.774)+'px;top:'+px(3.750)+'px;width:'+px(4.107)+'px;height:'+px(0.857)+'px;background:#FA510A;transform:skewX(-12deg);"></div>';
 }});
+var isCoverSlide=(s.layout==='title'||s.layout==='closing');
+if(!isCoverSlide){
 var deckTitle=document.getElementById('deckTitle')?document.getElementById('deckTitle').innerText:'';
-h+='<div style="position:absolute;left:29px;bottom:14px;font-size:9px;color:#595959;font-family:Arial,sans-serif;">'+esc(deckTitle)+'</div>';
-h+='<div style="position:absolute;right:20px;bottom:14px;font-size:9px;color:#1A1A1A;font-family:Arial,sans-serif;font-weight:700;">PwC</div>';
-h+='<div style="position:absolute;right:20px;bottom:28px;font-size:9px;color:#595959;font-family:Arial,sans-serif;">'+(s.num||'')+'</div>';
+h+='<div style="position:absolute;left:29px;bottom:14px;font-size:9px;font-family:Arial,sans-serif;"><span style="color:#1A1A1A;font-weight:700;">PwC</span><span style="color:#595959;margin-left:12px;">'+esc(deckTitle)+'</span></div>';
+h+='<div style="position:absolute;right:20px;bottom:14px;font-size:9px;color:#595959;font-family:Arial,sans-serif;">'+(s.num||'')+'</div>';
+}
 h+='</div>';});w.innerHTML=h;}
 function refreshSlides(){var frames=document.querySelectorAll('.sf');frames.forEach(function(f,idx){f.style.display=idx===cur?'block':'none';});document.getElementById('nc').textContent=(cur+1)+' / '+D.length;document.getElementById('hc').textContent='SLIDE '+(cur+1)+' OF '+D.length;}
 function placeImages(){D.forEach(function(s,i){s.els.forEach(function(el){if(el.type==='img'){var container=document.getElementById(el.ref);if(container){var frames=document.querySelectorAll('.sf');if(frames[i]){container.style.position='absolute';container.style.left=px(el.x)+'px';container.style.top=px(el.y)+'px';container.style.width=px(el.w)+'px';container.style.height=px(el.h)+'px';container.style.display='block';frames[i].appendChild(container);}}}});});}
 function aL(sl,dk,pptx){var noPwc=(typeof NO_PWC!=='undefined'&&NO_PWC);var cl=CL_BLACK;if(!cl)return;var CLIENT_H_IN=CLIENT_H_PX/80,CLIENT_W_IN=CLIENT_H_IN*CLIENT_AR;sl.addImage({data:cl,x:.29,y:6.55,w:CLIENT_W_IN,h:CLIENT_H_IN});}
-function ms(pptx,s){var dk=s.dark;var isCover=(s.layout==='title');var isClosing=(s.layout==='closing');var sl=pptx.addSlide({masterName:'PwC_LIGHT'});
+function ms(pptx,s){var dk=s.dark;var isCover=(s.layout==='title');var isClosing=(s.layout==='closing');var sl;
+if(isCover||isClosing){
+sl=pptx.addSlide({masterName:'PwC_COVER'});
+sl.background={data:COVER_BG};
 if(isCover){
+sl.addShape(pptx.shapes.PARALLELOGRAM,{x:4.665,y:4.625,w:4.106,h:0.858,fill:{color:'FA510A'},line:{type:'none'}});
+sl.addShape(pptx.shapes.PARALLELOGRAM,{x:8.774,y:3.750,w:4.107,h:0.857,fill:{color:'FA510A'},line:{type:'none'}});
+}
+}else{
+sl=pptx.addSlide({masterName:'PwC_LIGHT'});
+}
+aL(sl,dk,pptx);if(s.num)sl.addText(s.num,{x:11.5,y:6.95,w:1,h:.25,fontSize:9,fontFace:'Arial',color:'595959',align:'right'});return sl;}if(isCover){
 sl.background={data:COVER_BG};
 sl.addShape(pptx.shapes.PARALLELOGRAM,{x:4.665,y:4.625,w:4.106,h:0.858,fill:{color:'FA510A'},line:{type:'none'}});
 sl.addShape(pptx.shapes.PARALLELOGRAM,{x:8.774,y:3.750,w:4.107,h:0.857,fill:{color:'FA510A'},line:{type:'none'}});
@@ -107,7 +119,8 @@ sl.addShape(pptx.shapes.PARALLELOGRAM,{x:8.774,y:3.750,w:4.107,h:0.857,fill:{col
 sl.background={data:COVER_BG};}
 aL(sl,dk,pptx);if(s.num)sl.addText(s.num,{x:11.5,y:6.95,w:1,h:.25,fontSize:9,fontFace:'Arial',color:'595959',align:'right'});return sl;}async function bs(pptx,s,slideIdx){var sl=ms(pptx,s),dk=s.dark;if(!s.els)return;
 for(var j=0;j<s.els.length;j++){var el=s.els[j];
-if(el.type==='t'){var tw=Math.min(el.w*FW,12.83-el.x);sl.addText(el.text,{x:el.x,y:el.y,w:tw,h:(el.h||.3)*FH,fontFace:el.font==='H'?FONT.head:FONT.body,fontSize:el.size,color:rc(el.color,dk),valign:el.valign||'top',margin:0,autoFit:true});}
+if(el.type==='cover-bg'||el.type==='closing-bg'){continue;}
+else if(el.type==='t'){var tw=Math.min(el.w*FW,12.83-el.x);sl.addText(el.text,{x:el.x,y:el.y,w:tw,h:(el.h||.3)*FH,fontFace:el.font==='H'?FONT.head:FONT.body,fontSize:el.size,color:rc(el.color,dk),valign:el.valign||'top',margin:0,autoFit:true});}
 else if(el.type==='s'){var opts={x:el.x,y:el.y,w:el.w,h:el.h,fill:{color:rc(el.fill,dk)}};if(el.transparency)opts.fill.transparency=el.transparency;if(el.border){opts.line={color:rc(el.border,dk),width:el.bw||1};opts.shadow={type:'outer',blur:4,offset:1,angle:135,color:'000000',opacity:0.08};}sl.addShape(pptx.shapes.RECTANGLE,opts);}
 else if(el.type==='o'){var oOpts={x:el.x,y:el.y,w:el.w,h:el.h||el.w,fill:{color:rc(el.fill,dk)}};if(el.transparency)oOpts.fill.transparency=el.transparency;sl.addShape(pptx.shapes.OVAL,oOpts);}
 else if(el.type==='i'){var ic=(typeof ICONS!=='undefined'&&el.icon)?ICONS[el.icon]:null;if(ic){var iData=rl(ic,Math.round(el.w*96),Math.round((el.h||el.w)*96),'#'+rc(el.color||'accent',dk));if(iData){sl.addImage({data:iData,x:el.x,y:el.y,w:el.w,h:el.h||el.w});}}}
@@ -127,12 +140,13 @@ async function dlP(){var btn=document.getElementById('dlBtn'),st=document.getEle
 var pptx=new PptxGenJS();pptx.layout='LAYOUT_WIDE';pptx.title=document.getElementById('deckTitle').innerText;pptx.subject='PwC v'+(typeof PV!=='undefined'?PV:'');pptx.company='PwC';pptx.theme={headFontFace:'Georgia',bodyFontFace:'Arial'};
 if(typeof resolveLayouts==='function')resolveLayouts();
 var noPwc=(typeof NO_PWC!=='undefined'&&NO_PWC);
+var deckTitle=document.getElementById('deckTitle').innerText||'';
 var ltObjs=[
-{text:{text:document.getElementById('deckTitle').innerText||'',options:{x:.29,y:6.95,w:5,h:.25,fontSize:9,fontFace:'Arial',color:'595959',align:'left'}}},
-{text:{text:'PwC',options:{x:11,y:6.95,w:2,h:.25,fontSize:9,fontFace:'Arial',color:'1A1A1A',align:'right',bold:true}}}
+{text:{text:'PwC    '+deckTitle,options:{x:.29,y:6.95,w:6,h:.25,fontSize:9,fontFace:'Arial',color:'595959',align:'left'}}}
 ];
+var coverObjs=[];
 pptx.defineSlideMaster({title:'PwC_LIGHT',background:{color:'FFFFFF'},objects:ltObjs});
-pptx.defineSlideMaster({title:'PwC_LIGHT',background:{color:'FFFFFF'},objects:ltObjs});
+pptx.defineSlideMaster({title:'PwC_COVER',background:{color:'FFFFFF'},objects:coverObjs});
 for(var i=0;i<D.length;i++){st.textContent='Compiling slide '+(i+1)+' of '+D.length+'...';await new Promise(function(r){requestAnimationFrame(r);});await bs(pptx,D[i],i);}st.textContent='Packaging...';await new Promise(function(r){requestAnimationFrame(r);});var t=document.getElementById('deckTitle').innerText.replace(/[^a-zA-Z0-9]/g,'_');await pptx.writeFile({fileName:'PwC_'+t+'_'+D.length+'slides.pptx'});allFrames.forEach(function(f,idx){f.style.display=idx===cur?'block':'none';});st.textContent='\u2705 Download complete!';}catch(e){st.textContent='Error: '+e.message;var af=document.querySelectorAll('.sf');af.forEach(function(f,idx){f.style.display=idx===cur?'block':'none';});}btn.disabled=false;btn.textContent='\u2B07 DOWNLOAD PPTX';}
 var cur=0;
 function show(i){var f=document.querySelectorAll('.sf');if(i<0||i>=f.length)return;f[cur].style.display='none';cur=i;f[cur].style.display='block';document.getElementById('nc').textContent=(cur+1)+' / '+D.length;document.getElementById('hc').textContent='SLIDE '+(cur+1)+' OF '+D.length;}
