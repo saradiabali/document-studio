@@ -44,15 +44,12 @@ function buildLayout(s){
 // ═══ PwC TITLE — cream background, big serif title, orange accent ═══
 // Matches template "Title Slide" — cream/blush gradient feel
 function layoutTitle(s){
-  var els=[];
-  // Cover background: use the real branded PNG in both HTML preview and PPTX
-  // Engine ms() applies L.coverBg via sl.background for PPTX
-  // HTML preview: we inject a full-bleed img via the 'cover-bg' type
-  els.push({type:'cover-bg'});
-  // Orange accent bar — left side vertical
-  els.push({type:'b',x:0,y:0,w:0.07,h:7.5,fill:'accent'});
+var els=[];
+els.push({type:'cover-bg'});
+// Full-color PwC logo — top-left (x:0.40, y:0.40, w:1.35, h:0.66)
+els.push({type:'cover-logo'});
 
-  var y=1.8;
+var y=1.8;
   if(s.tag){
     els.push({type:'t',text:s.tag.toUpperCase(),x:.6,y:y,w:10,h:.3,font:'B',size:10,color:'accent'});
     y+=0.45;
@@ -79,7 +76,6 @@ function layoutTitle(s){
 function layoutClosing(s){
   var els=[];
   els.push({type:'cover-bg'});
-  els.push({type:'b',x:0,y:0,w:0.07,h:7.5,fill:'accent'});
 
   var tH=(s.title&&s.title.length>40)?1.4:0.85;
   var y=2.4;
@@ -176,7 +172,6 @@ function layoutCards(s){
     var ix=cx+0.2;var tw=cw*0.82;var dw=cw-0.4;
     // Card with left orange accent bar
     els.push({type:'s',x:cx,y:cy,w:cw,h:cardH,fill:'cardBg',border:'ltGray',bw:1});
-    els.push({type:'b',x:cx,y:cy,w:0.05,h:cardH,fill:'accent'});
     var ny=cy+0.2;
     if(compact){
       if(item.icon){
@@ -227,7 +222,6 @@ function layoutStats(s){
     var cy=startY+row*(cardH+gap);
     var ix=cx+0.2;var tw=cw*0.82;var dw=cw-0.4;
     els.push({type:'s',x:cx,y:cy,w:cw,h:cardH,fill:'cardBg',border:'ltGray',bw:1});
-    els.push({type:'b',x:cx,y:cy,w:0.05,h:cardH,fill:'accent'});
 
     var valLen=(item.value||'').length;var valW=Math.max(1.5,valLen*0.38);var labelW=tw-valW-0.1;
     if(labelW>=1.8){
@@ -278,7 +272,6 @@ function layoutRows(s){
   items.forEach(function(item,i){
     var ry=startY+i*(rowH+gap);var num=('0'+(i+1)).slice(-2);
     els.push({type:'s',x:.5,y:ry,w:12.3,h:rowH,fill:'cardBg',border:'ltGray',bw:1});
-    els.push({type:'b',x:.5,y:ry,w:0.05,h:rowH,fill:'accent'});
     if(numbered){
       els.push({type:'t',text:num,x:.7,y:ry,w:0.8,h:rowH,font:'H',size:rowH<0.7?18:24,color:'accent',valign:'middle'});
       els.push({type:'t',text:item.title||'',x:1.6,y:ry,w:rowH<0.7?2.5:3.5,h:rowH,font:'H',size:rowH<0.7?12:13,color:'title',valign:'middle'});
@@ -302,7 +295,6 @@ function layoutDetail(s){
   var cardX=2.5,cardW=8.3;var itemH=0.7,pad=0.25;
   var cardH=items.length*itemH+pad*2;var cardY=2.3;
   els.push({type:'s',x:cardX,y:cardY,w:cardW,h:cardH,fill:'cardBg',border:'ltGray',bw:1});
-  els.push({type:'b',x:cardX,y:cardY,w:0.05,h:cardH,fill:'accent'});
 
   items.forEach(function(item,i){
     var iy=cardY+pad+i*itemH;var ix=cardX+0.35;
