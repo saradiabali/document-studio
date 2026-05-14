@@ -76,6 +76,7 @@ var y=1.8;
 function layoutClosing(s){
   var els=[];
   els.push({type:'cover-bg'});
+  els.push({type:'cover-logo'}); 
 
   var tH=(s.title&&s.title.length>40)?1.4:0.85;
   var y=2.4;
