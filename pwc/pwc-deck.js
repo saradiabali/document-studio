@@ -22,7 +22,7 @@ ctx.translate((tw-vb[2]*s)/2,(th-vb[3]*s)/2);
 ctx.scale(s,s);
 ctx.fillStyle='#1A1A1A';
 ctx.fill(new Path2D(VP.w.p[0]));
-ctx.fillStyle='#E05C14';
+ctx.fillStyle='#FD5108';
 ctx.fill(new Path2D(VP.w.p[1]));
 // Find actual pixel bounds
 var data=ctx.getImageData(0,0,tw,th).data;
@@ -46,7 +46,9 @@ var c=document.createElement('canvas');
 c.width=w;c.height=h;
 var ctx=c.getContext('2d');
 // PwC: white bottom-left → peach top-right
-var grad=ctx.createLinearGradient(0,h,w,0);
+var ang=315*Math.PI/180;
+var cx=w/2,cy=h/2,len=Math.sqrt(w*w+h*h)/2;
+var grad=ctx.createLinearGradient(cx+Math.cos(ang)*len,cy-Math.sin(ang)*len,cx-Math.cos(ang)*len,cy+Math.sin(ang)*len);
 grad.addColorStop(0,'#FFFFFF');
 grad.addColorStop(1,'#FEAF8F');
 ctx.fillStyle=grad;
@@ -95,20 +97,24 @@ var deckTitle=document.getElementById('deckTitle')?document.getElementById('deck
 h+='<div style="position:absolute;left:29px;bottom:14px;font-size:9px;color:#595959;font-family:Arial,sans-serif;">'+esc(deckTitle)+'</div>';
 h+='<div style="position:absolute;right:20px;bottom:14px;font-size:9px;color:#1A1A1A;font-family:Arial,sans-serif;font-weight:700;">PwC</div>';
 }
-else if(el.type==='closing-bg'){
-h+='<div style="position:absolute;left:0;top:0;width:100%;height:100%;background:linear-gradient(to top right,#FFFFFF,#FEAF8F);"></div>';
+else if(el.type==='cover-meta'){
+h+='<div style="position:absolute;left:'+px(0.40)+'px;top:'+px(6.65)+'px;width:'+px(5.16)+'px;font-size:14px;font-family:Arial,sans-serif;color:#1A1A1A;line-height:1.5;">';
+if(el.presenter) h+='<div>Presentation by <strong>'+esc(el.presenter)+'</strong></div>';
+if(el.date) h+='<div>'+esc(el.date)+'</div>';
+h+='</div>';
 }
+else if(el.type==='closing-bg'){
+h+='<div style="position:absolute;left:0;top:0;width:100%;height:100%;background:linear-gradient(315deg,#FEAF8F,#FFFFFF);"></div>';}
 else if(el.type==='cover-bg'){
-h+='<div style="position:absolute;left:0;top:0;width:100%;height:100%;background:linear-gradient(to top right,#FFFFFF,#FEAF8F);"></div>';
+h+='<div style="position:absolute;left:0;top:0;width:100%;height:100%;background:linear-gradient(315deg,#FEAF8F,#FFFFFF);"></div>';
 h+='<div style="position:absolute;left:'+px(4.665)+'px;top:'+px(4.625)+'px;width:'+px(4.106)+'px;height:'+px(0.858)+'px;background:#FA510A;transform:skewX(-30deg);"></div>';
 h+='<div style="position:absolute;left:'+px(8.774)+'px;top:'+px(3.750)+'px;width:'+px(4.107)+'px;height:'+px(0.857)+'px;background:#FA510A;transform:skewX(-30deg);"></div>';
 }});
 var isCoverSlide=(s.layout==='title'||s.layout==='closing');
 if(!isCoverSlide){
 var deckTitle=document.getElementById('deckTitle')?document.getElementById('deckTitle').innerText:'';
-h+='<div style="position:absolute;left:29px;bottom:14px;font-size:9px;font-family:Arial,sans-serif;"><span style="color:#1A1A1A;font-weight:700;">PwC</span><span style="color:#595959;margin-left:12px;">'+esc(deckTitle)+'</span></div>';
-h+='<div style="position:absolute;right:20px;bottom:14px;font-size:9px;color:#595959;font-family:Arial,sans-serif;">'+(s.num||'')+'</div>';
-}
+h+='<div style="position:absolute;left:29px;bottom:14px;font-size:10.5px;font-family:Arial,sans-serif;"><span style="color:#1A1A1A;font-weight:700;">PwC</span><span style="color:#1A1A1A;margin-left:12px;">'+esc(deckTitle)+'</span></div>';
+h+='<div style="position:absolute;right:20px;bottom:14px;font-size:10.5px;color:#1A1A1A;font-family:Arial,sans-serif;">'+(s.num||'')+'</div>';}
 h+='</div>';});w.innerHTML=h;}
 function refreshSlides(){var frames=document.querySelectorAll('.sf');frames.forEach(function(f,idx){f.style.display=idx===cur?'block':'none';});document.getElementById('nc').textContent=(cur+1)+' / '+D.length;document.getElementById('hc').textContent='SLIDE '+(cur+1)+' OF '+D.length;}
 function placeImages(){D.forEach(function(s,i){s.els.forEach(function(el){if(el.type==='img'){var container=document.getElementById(el.ref);if(container){var frames=document.querySelectorAll('.sf');if(frames[i]){container.style.position='absolute';container.style.left=px(el.x)+'px';container.style.top=px(el.y)+'px';container.style.width=px(el.w)+'px';container.style.height=px(el.h)+'px';container.style.display='block';frames[i].appendChild(container);}}}});});}
@@ -124,7 +130,7 @@ sl.addShape(pptx.shapes.PARALLELOGRAM,{x:8.774,y:3.750,w:4.107,h:0.857,fill:{col
 }else{
 sl=pptx.addSlide({masterName:'PwC_LIGHT'});
 }
-aL(sl,dk,pptx);if(s.num)sl.addText(s.num,{x:11.5,y:6.95,w:1,h:.25,fontSize:9,fontFace:'Arial',color:'595959',align:'right'});return sl;}async function bs(pptx,s,slideIdx){var sl=ms(pptx,s),dk=s.dark;if(!s.els)return;
+aL(sl,dk,pptx);return sl;}async function bs(pptx,s,slideIdx){var sl=ms(pptx,s),dk=s.dark;if(!s.els)return;
 for(var j=0;j<s.els.length;j++){var el=s.els[j];
 if(el.type==='cover-bg'||el.type==='closing-bg'){continue;}
 else if(el.type==='t'){var tw=Math.min(el.w*FW,12.83-el.x);sl.addText(el.text,{x:el.x,y:el.y,w:tw,h:(el.h||.3)*FH,fontFace:el.font==='H'?FONT.head:FONT.body,fontSize:el.size,color:rc(el.color,dk),valign:el.valign||'top',margin:0,autoFit:true});}
@@ -139,6 +145,12 @@ else if(el.type==='tbl'){if(el._agendaTable){var aRows=[];(el.rows||[]).forEach(
 else if(el.type==='cover-logo'){
 sl.addImage({data:COVER_LOGO,x:0.40,y:0.40,w:1.35,h:0.66});
 }
+else if(el.type==='cover-meta'){
+var lines=[];
+if(el.presenter) lines.push([{text:'Presentation by ',options:{bold:false,color:'1A1A1A',fontFace:'Arial',fontSize:14}},{text:el.presenter,options:{bold:true,color:'1A1A1A',fontFace:'Arial',fontSize:14}}]);
+if(el.date) lines.push([{text:el.date,options:{bold:false,color:'1A1A1A',fontFace:'Arial',fontSize:14}}]);
+lines.forEach(function(line,li){sl.addText(line,{x:0.40,y:6.65+li*0.25,w:5.16,h:0.25});});
+}
 
 else if(el.type==='footer'){continue;}
 else if(el.type==='img'){var container=document.getElementById(el.ref);var genImg=findImg(container);if(genImg){try{var imgData=await captureImage(genImg,el.w,el.h);if(imgData){sl.addImage({data:imgData,x:el.x,y:el.y,w:el.w,h:el.h});}}catch(e){}}}
@@ -149,7 +161,8 @@ if(typeof resolveLayouts==='function')resolveLayouts();
 var noPwc=(typeof NO_PWC!=='undefined'&&NO_PWC);
 var deckTitle=document.getElementById('deckTitle').innerText||'';
 var ltObjs=[
-{text:{text:'PwC    '+deckTitle,options:{x:.29,y:6.95,w:6,h:.25,fontSize:9,fontFace:'Arial',color:'595959',align:'left'}}}
+{text:{text:'PwC    '+deckTitle,options:{x:.29,y:6.95,w:6,h:.25,fontSize:10.5,fontFace:'Arial',color:'1A1A1A',align:'left'}}},
+{text:{text:{text:'',field:'slideNumber'},options:{x:12,y:6.95,w:1,h:.25,fontSize:10.5,fontFace:'Arial',color:'1A1A1A',align:'right'}}}
 ];
 var coverObjs=[];
 pptx.defineSlideMaster({title:'PwC_LIGHT',background:{color:'FFFFFF'},objects:ltObjs});
