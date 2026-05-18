@@ -44,56 +44,31 @@ function buildLayout(s){
 // ═══ PwC TITLE — cream background, big serif title, orange accent ═══
 // Matches template "Title Slide" — cream/blush gradient feel
 function layoutTitle(s){
-  var els=[];
-  // Cover background: use the real branded PNG in both HTML preview and PPTX
-  // Engine ms() applies L.coverBg via sl.background for PPTX
-  // HTML preview: we inject a full-bleed img via the 'cover-bg' type
-  els.push({type:'cover-bg'});
-  // Orange accent bar — left side vertical
-  els.push({type:'b',x:0,y:0,w:0.07,h:7.5,fill:'accent'});
+var els=[];
+els.push({type:'cover-bg'});
+els.push({type:'cover-logo'});
 
-  var y=1.8;
-  if(s.tag){
-    els.push({type:'t',text:s.tag.toUpperCase(),x:.6,y:y,w:10,h:.3,font:'B',size:10,color:'accent'});
-    y+=0.45;
-  }
-  var tH=(s.title&&s.title.length>40)?1.4:0.85;
-  els.push({type:'t',text:s.title||'',x:.6,y:y,w:9,h:tH,font:'H',size:44,color:'title'});
-  y+=tH+0.25;
+// Title — valign top (not bottom), no subtitle
+els.push({type:'t',text:s.title||'',x:0.413,y:2.116,w:6.195,h:2.0,font:'H',size:48,color:'title',valign:'top'});
 
-  if(s.subtitle){
-    var subH=(s.subtitle.length>60)?0.7:0.4;
-    els.push({type:'t',text:s.subtitle,x:.6,y:y,w:9,h:subH,font:'B',size:18,color:'sub'});
-    y+=subH+0.15;
-  }
-  if(s.description){
-    els.push({type:'t',text:s.description,x:.6,y:y,w:9,h:.4,font:'B',size:12,color:'body'});
-  }
-  // Date + presenter bottom-left
-  if(s.date)      els.push({type:'t',text:'Presentation by '+(s.presenter||''),x:.6,y:5.6,w:7,h:.3,font:'B',size:11,color:'body'});
-  if(s.date)      els.push({type:'t',text:s.date,x:.6,y:5.9,w:7,h:.3,font:'B',size:11,color:'body'});
-  return els;
+// Name + date — 14pt, position: x=1.02cm=0.40", y=16.89cm=6.65"
+if(s.presenter||s.date){
+els.push({type:'cover-meta',presenter:s.presenter||'',date:s.date||''});
+}
+return els;
 }
 
 // ═══ PwC CLOSING — cream background, thank you, contact info ═══
 function layoutClosing(s){
-  var els=[];
-  els.push({type:'cover-bg'});
-  els.push({type:'b',x:0,y:0,w:0.07,h:7.5,fill:'accent'});
+var els=[];
+els.push({type:'closing-bg'});
 
-  var tH=(s.title&&s.title.length>40)?1.4:0.85;
-  var y=2.4;
-  els.push({type:'t',text:s.title||'Thank you.',x:.6,y:y,w:9,h:tH,font:'H',size:44,color:'title'});
-  y+=tH+0.3;
-  if(s.subtitle){
-    var subH=(s.subtitle.length>60)?0.7:0.4;
-    els.push({type:'t',text:s.subtitle,x:.6,y:y,w:9,h:subH,font:'B',size:16,color:'sub'});
-    y+=subH+0.15;
-  }
-  if(s.attribution){
-    els.push({type:'t',text:s.attribution,x:.6,y:y,w:9,h:.4,font:'B',size:12,color:'body'});
-  }
-  return els;
+els.push({type:'t',text:s.title||'Thank you.',x:0.413,y:2.116,w:6.195,h:2.0,font:'H',size:66,color:'title',valign:'top'});
+
+// pwc.com — Georgia bold 16pt
+els.push({type:'t',text:'pwc.com',x:0.40,y:6.80,w:3,h:0.4,font:'H',size:16,color:'title',bold:true});
+
+return els;
 }
 
 // ═══ PwC DIVIDER — matches template exactly
@@ -101,22 +76,25 @@ function layoutClosing(s){
 // Big orange number top-right (350pt), title bottom-left (48pt Georgia serif)
 // Measured from official PwC divider template
 function layoutDivider(s){
-  var els=[];
-  var cream = !s.style || s.style !== 'white';
-  // Background — cream or white
-  if(cream) els.push({type:'s',x:0,y:0,w:13.33,h:7.5,fill:'FFE8D4'});
-  // Big orange section number — top-right, 350pt
-  // Position: x=8.961 y=0.626 w=3.786 h=4.712 (from template)
-  var num = String(s.number || s.num || '1');
-  els.push({type:'t',text:num,x:8.961,y:0.626,w:3.786,h:4.712,font:'H',size:350,color:'accent',valign:'top'});
-  // Title — bottom-left, large serif, 48pt
-  // Position: x=0.406 y=3.784 w=6.174 h=2.836 (from template)
-  var title = s.title || '';
-  els.push({type:'t',text:title,x:0.406,y:3.784,w:6.174,h:2.836,font:'H',size:48,color:'title',valign:'bottom'});
-  s.num = '';
-  return els;
-}
+var els=[];
+var cream = !s.style || s.style !== 'white';
+if(cream) els.push({type:'s',x:0,y:0,w:13.33,h:7.5,fill:'FFE8D4'});
 
+// Big number — Arial, 350pt, color FD5108, right-aligned
+// Position: x=22.76cm=8.96", y=1.6cm=0.63"
+var num = String(s.number || '1');
+els.push({type:'t',text:num,x:8.96,y:0.63,w:3.8,h:4.5,font:'B',size:350,color:'FD5108',valign:'top'});
+
+// Title — bottom-left, large serif, 48pt
+var title = s.title || '';
+els.push({type:'t',text:title,x:0.406,y:3.784,w:6.174,h:2.836,font:'H',size:48,color:'title',valign:'bottom'});
+
+// Footer elements (same as content slides)
+els.push({type:'footer'});
+
+s.num = '';
+return els;
+}
 // ═══ PwC AGENDA — matches template exactly
 // Large "Agenda" title bottom-left (48pt Georgia)
 // Numbered list right side: orange number (28pt bold) + item text (28pt)
@@ -124,29 +102,33 @@ function layoutDivider(s){
 // Measured from official PwC agenda template
 // items: array of strings (up to 8)
 function layoutAgenda(s){
-  var els=[];
-  var cream = s.style === 'cream';
-  // Background
-  if(cream) els.push({type:'s',x:0,y:0,w:13.33,h:7.5,fill:'FFE8D4'});
-  // "Agenda" title — bottom-left, large serif
-  // Position: x=0.429 y=2.952 w=4.574 h=2.726 (from template)
-  els.push({type:'t',text:s.title||'Agenda',x:0.429,y:2.952,w:4.574,h:2.726,font:'H',size:48,color:'title',valign:'bottom'});
-  // Numbered list — right side
-  // Container: x=5.674 y=0.845 w=7.257 h=3.640 (from template)
-  // Each item: number in orange (28pt), text in black (28pt)
-  var items = s.items || [];
-  var listX = 5.674, listY = 0.845, listW = 7.257, listH = 3.640;
-  var rowH = Math.min(listH / Math.max(items.length, 1), 0.65);
-  var numW = 0.5, gap = 0.2, textW = listW - numW - gap;
-  items.forEach(function(item, i){
-    var ry = listY + i * rowH;
-    // Number in orange
-    els.push({type:'t',text:String(i+1),x:listX,y:ry,w:numW,h:rowH,font:'H',size:28,color:'accent',valign:'middle'});
-    // Item text in black
-    els.push({type:'t',text:item,x:listX+numW+gap,y:ry,w:textW,h:rowH,font:'B',size:28,color:'title',valign:'middle'});
-  });
-  s.num = '';
-  return els;
+var els=[];
+var cream = s.style === 'cream';
+if(cream) els.push({type:'s',x:0,y:0,w:13.33,h:7.5,fill:'FFE8D4'});
+
+// "Agenda" title — bottom-left, large serif
+els.push({type:'t',text:s.title||'Agenda',x:0.429,y:2.952,w:4.574,h:2.726,font:'H',size:60,color:'title',valign:'bottom'});
+
+// Agenda table — right side
+var items = s.items || [];
+var tblX = 5.674, tblY = 0.845, tblW = 7.257;
+var rowH = Math.min(3.640 / Math.max(items.length, 1), 0.65);
+var rows = items.map(function(item, i) {
+  return [String(i + 1), item];
+});
+
+els.push({
+  type: 'tbl',
+  x: tblX,
+  y: tblY,
+  w: tblW,
+  h: rows.length * rowH,
+  rows: rows,
+  _agendaTable: true
+});
+
+s.num = '';
+return els;
 }
 
 // ═══ PwC CARDS — clean white cards, serif titles, orange accent ═══
@@ -155,8 +137,8 @@ function layoutCards(s){
   var cols=s.columns||Math.min(items.length,4);
   var grid=GRIDS[cols]||GRIDS[3];
 
-  if(s.tag) els.push({type:'t',text:s.tag.toUpperCase(),x:.5,y:.6,w:11,h:.25,font:'B',size:10,color:'accent'});
-  els.push({type:'t',text:s.title||'',x:.5,y:.85,w:11,h:.55,font:'H',size:34,color:'title'});
+  if(s.tag) els.push({type:'t',text:s.tag.toUpperCase(),x:.5,y:.5,w:11,h:.25,font:'B',size:10,color:'accent'});
+  els.push({type:'t',text:s.title||'',x:.5,y:.75,w:11,h:.55,font:'H',size:34,color:'title'});
   if(s.subtitle) els.push({type:'t',text:s.subtitle,x:.5,y:1.5,w:10,h:.3,font:'B',size:12,color:'body'});
 
   var nRows=Math.ceil(items.length/cols);var gap=0.2;
@@ -172,21 +154,20 @@ function layoutCards(s){
     var ix=cx+0.2;var tw=cw*0.82;var dw=cw-0.4;
     // Card with left orange accent bar
     els.push({type:'s',x:cx,y:cy,w:cw,h:cardH,fill:'cardBg',border:'ltGray',bw:1});
-    els.push({type:'b',x:cx,y:cy,w:0.05,h:cardH,fill:'accent'});
     var ny=cy+0.2;
     if(compact){
       if(item.icon){
         els.push({type:'i',icon:item.icon,x:ix,y:ny+0.02,w:.35,h:.35,color:'accent'});
-        els.push({type:'t',text:item.title||'',x:ix+0.45,y:ny,w:tw-0.45,h:.35,font:'H',size:13,color:'title'});
+        els.push({type:'t',text:item.title||'',x:ix+0.45,y:ny,w:tw-0.45,h:.35,font:'H',size:13,color:'title',bold:true});
       } else {
-        els.push({type:'t',text:item.title||'',x:ix,y:ny,w:tw,h:.35,font:'H',size:13,color:'title'});
+        els.push({type:'t',text:item.title||'',x:ix,y:ny,w:tw,h:.35,font:'H',size:13,color:'title',bold:true});
       }
       ny+=0.4;
       if(item.sub){els.push({type:'t',text:item.sub,x:ix,y:ny,w:tw,h:.25,font:'B',size:11,color:'accent'});ny+=0.28;}
       els.push({type:'d',x:ix,y:ny,w:dw,color:'ltGray'});ny+=0.15;
     } else {
       if(item.icon){els.push({type:'i',icon:item.icon,x:ix,y:ny+0.05,w:.5,h:.5,color:'accent'});ny+=0.75;}
-      els.push({type:'t',text:item.title||'',x:ix,y:ny,w:tw,h:.5,font:'H',size:15,color:'title'});ny+=0.6;
+      els.push({type:'t',text:item.title||'',x:ix,y:ny,w:tw,h:.5,font:'H',size:15,color:'title',bold:true});ny+=0.6;
       if(item.sub){els.push({type:'t',text:item.sub,x:ix,y:ny,w:tw,h:.3,font:'B',size:12,color:'accent'});ny+=0.35;}
       els.push({type:'d',x:ix,y:ny,w:dw,color:'ltGray'});ny+=0.25;
     }
@@ -207,8 +188,8 @@ function layoutStats(s){
   var cols=s.columns||2;var nRows=s.rows||Math.ceil(items.length/cols);
   var grid=GRIDS[cols]||GRIDS[2];
 
-  if(s.tag) els.push({type:'t',text:s.tag.toUpperCase(),x:.5,y:.6,w:11,h:.25,font:'B',size:10,color:'accent'});
-  els.push({type:'t',text:s.title||'',x:.5,y:.85,w:11,h:.55,font:'H',size:34,color:'title'});
+  if(s.tag) els.push({type:'t',text:s.tag.toUpperCase(),x:.5,y:.5,w:11,h:.25,font:'B',size:10,color:'accent'});
+  els.push({type:'t',text:s.title||'',x:.5,y:.75,w:11,h:.55,font:'H',size:34,color:'title'});
   if(s.subtitle) els.push({type:'t',text:s.subtitle,x:.5,y:1.5,w:10,h:.3,font:'B',size:12,color:'body'});
 
   var gap=0.2;var totalH=6.2-2.1;
@@ -223,7 +204,6 @@ function layoutStats(s){
     var cy=startY+row*(cardH+gap);
     var ix=cx+0.2;var tw=cw*0.82;var dw=cw-0.4;
     els.push({type:'s',x:cx,y:cy,w:cw,h:cardH,fill:'cardBg',border:'ltGray',bw:1});
-    els.push({type:'b',x:cx,y:cy,w:0.05,h:cardH,fill:'accent'});
 
     var valLen=(item.value||'').length;var valW=Math.max(1.5,valLen*0.38);var labelW=tw-valW-0.1;
     if(labelW>=1.8){
@@ -246,8 +226,8 @@ function layoutStats(s){
 // ═══ PwC SPLIT ═══
 function layoutSplit(s){
   var els=[];var items=s.items||[];
-  if(s.tag) els.push({type:'t',text:s.tag.toUpperCase(),x:.5,y:.6,w:11,h:.25,font:'B',size:10,color:'accent'});
-  els.push({type:'t',text:s.title||'',x:.5,y:.85,w:11,h:.55,font:'H',size:34,color:'title'});
+  if(s.tag) els.push({type:'t',text:s.tag.toUpperCase(),x:.5,y:.5,w:11,h:.25,font:'B',size:10,color:'accent'});
+  els.push({type:'t',text:s.title||'',x:.5,y:.75,w:11,h:.55,font:'H',size:34,color:'title'});
   if(s.subtitle) els.push({type:'t',text:s.subtitle,x:.5,y:1.5,w:10,h:.3,font:'B',size:12,color:'body'});
 
   var positions=[{x:.5,w:5.9},{x:6.9,w:5.9}];
@@ -264,8 +244,8 @@ function layoutSplit(s){
 // ═══ PwC ROWS ═══
 function layoutRows(s){
   var els=[];var items=s.items||[];var numbered=s.numbered!==false;
-  if(s.tag) els.push({type:'t',text:s.tag.toUpperCase(),x:.5,y:.6,w:11,h:.25,font:'B',size:10,color:'accent'});
-  els.push({type:'t',text:s.title||'',x:.5,y:.85,w:11,h:.55,font:'H',size:34,color:'title'});
+  if(s.tag) els.push({type:'t',text:s.tag.toUpperCase(),x:.5,y:.5,w:11,h:.25,font:'B',size:10,color:'accent'});
+  els.push({type:'t',text:s.title||'',x:.5,y:.75,w:11,h:.55,font:'H',size:34,color:'title'});
   if(s.subtitle) els.push({type:'t',text:s.subtitle,x:.5,y:1.5,w:10,h:.3,font:'B',size:12,color:'body'});
 
   var startY=2.1;var totalH=6.1-startY;var gap=0.1;
@@ -274,13 +254,12 @@ function layoutRows(s){
   items.forEach(function(item,i){
     var ry=startY+i*(rowH+gap);var num=('0'+(i+1)).slice(-2);
     els.push({type:'s',x:.5,y:ry,w:12.3,h:rowH,fill:'cardBg',border:'ltGray',bw:1});
-    els.push({type:'b',x:.5,y:ry,w:0.05,h:rowH,fill:'accent'});
     if(numbered){
       els.push({type:'t',text:num,x:.7,y:ry,w:0.8,h:rowH,font:'H',size:rowH<0.7?18:24,color:'accent',valign:'middle'});
-      els.push({type:'t',text:item.title||'',x:1.6,y:ry,w:rowH<0.7?2.5:3.5,h:rowH,font:'H',size:rowH<0.7?12:13,color:'title',valign:'middle'});
+      els.push({type:'t',text:item.title||'',x:1.6,y:ry,w:rowH<0.7?2.5:3.5,h:rowH,font:'H',size:rowH<0.7?12:13,color:'title',valign:'middle',bold:true});
       els.push({type:'t',text:item.text||'',x:rowH<0.7?4.2:5.6,y:ry,w:rowH<0.7?7.2:6.0,h:rowH,font:'B',size:11,color:'body',valign:'middle'});
     } else {
-      els.push({type:'t',text:item.title||'',x:.7,y:ry,w:3.0,h:rowH,font:'H',size:rowH<0.7?12:13,color:'title',valign:'middle'});
+      els.push({type:'t',text:item.title||'',x:.7,y:ry,w:3.0,h:rowH,font:'H',size:rowH<0.7?12:13,color:'title',valign:'middle',bold:true});
       els.push({type:'t',text:item.text||'',x:3.8,y:ry,w:7.6,h:rowH,font:'B',size:11,color:'body',valign:'middle'});
     }
   });
@@ -291,14 +270,13 @@ function layoutRows(s){
 // ═══ PwC DETAIL ═══
 function layoutDetail(s){
   var els=[];var items=s.items||[];
-  if(s.tag) els.push({type:'t',text:s.tag.toUpperCase(),x:.5,y:.6,w:11,h:.25,font:'B',size:10,color:'accent'});
-  els.push({type:'t',text:s.title||'',x:.5,y:.85,w:11,h:.55,font:'H',size:34,color:'title'});
+  if(s.tag) els.push({type:'t',text:s.tag.toUpperCase(),x:.5,y:.5,w:11,h:.25,font:'B',size:10,color:'accent'});
+  els.push({type:'t',text:s.title||'',x:.5,y:.75,w:11,h:.55,font:'H',size:34,color:'title'});
   if(s.subtitle) els.push({type:'t',text:s.subtitle,x:.5,y:1.5,w:10,h:.3,font:'B',size:12,color:'body'});
 
   var cardX=2.5,cardW=8.3;var itemH=0.7,pad=0.25;
   var cardH=items.length*itemH+pad*2;var cardY=2.3;
   els.push({type:'s',x:cardX,y:cardY,w:cardW,h:cardH,fill:'cardBg',border:'ltGray',bw:1});
-  els.push({type:'b',x:cardX,y:cardY,w:0.05,h:cardH,fill:'accent'});
 
   items.forEach(function(item,i){
     var iy=cardY+pad+i*itemH;var ix=cardX+0.35;
@@ -314,8 +292,8 @@ function layoutDetail(s){
 // ═══ PwC BULLETS ═══
 function layoutBullets(s){
   var els=[];var items=s.items||[];
-  if(s.tag) els.push({type:'t',text:s.tag.toUpperCase(),x:.5,y:.6,w:11,h:.25,font:'B',size:10,color:'accent'});
-  els.push({type:'t',text:s.title||'',x:.5,y:.85,w:11,h:.55,font:'H',size:34,color:'title'});
+  if(s.tag) els.push({type:'t',text:s.tag.toUpperCase(),x:.5,y:.5,w:11,h:.25,font:'B',size:10,color:'accent'});
+  els.push({type:'t',text:s.title||'',x:.5,y:.75,w:11,h:.55,font:'H',size:34,color:'title'});
   if(s.subtitle) els.push({type:'t',text:s.subtitle,x:.5,y:1.5,w:10,h:.3,font:'B',size:12,color:'body'});
   var bulletText=items.map(function(item){return '\u2014  '+item;}).join('\n');
   els.push({type:'t',text:bulletText,x:.5,y:2.1,w:9.8,h:4.2,font:'B',size:12,color:'body'});
